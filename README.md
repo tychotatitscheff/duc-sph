@@ -1,6 +1,6 @@
 Projet PJM
 ==============
 
-Simulation de fluide par SPH
+Simulation de fluides par SPH
 --------------
 
