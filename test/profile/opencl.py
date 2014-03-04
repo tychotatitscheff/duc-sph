@@ -1,28 +1,31 @@
 # example provided by Roger Pau Monn'e
 
 from __future__ import print_function
+from time import time
+from gettext import gettext as _
+
 import pyopencl as cl
 import numpy
 
-from time import time
+from helper.bcolor.bcolor import bcolor
 
-data_points = 2**25  # ~8 million data points, ~32 MB data
-workers = 2**10  # 256 workers, play with this to see performance differences
-               # eg: 2**0 => 1 worker will be non-parallel execution on gpu
-               # data points must be a multiple of workers
 
-a = numpy.random.rand(data_points).astype(numpy.float32)
-b = numpy.random.rand(data_points).astype(numpy.float32)
-c_result = numpy.empty_like(a)
+points = 2**25  # ~3 milliards de données
+ouvriers = 2**10  # 1024 workers
+
+
+a = numpy.random.rand(points).astype(numpy.float32)
+b = numpy.random.rand(points).astype(numpy.float32)
+c_resultats = numpy.empty_like(a)
 
 # Speed in normal CPU usage
-time1 = time()
+t1 = time()
 c_temp = (a + b)  # adds each element in a to its corresponding element in b
-c_temp = c_temp * c_temp  # element-wise multiplication
-c_result = c_temp * (a / 2.0)  # element-wise half a and multiply
-time2 = time()
+c_temp *= c_temp  # element-wise multiplication
+c_resultats = c_temp * (a / 2.0)  # element-wise half a and multiply
+t2 = time()
 
-print("Execution time of test without OpenCL: ", time2 - time1, "s")
+print(bcolor.WARNING + _("Execution time of test without OpenCL: ") + bcolor.OKGREEN, t2 - t1, "s" + bcolor.ENDC)
 
 
 for platform in cl.get_platforms():
@@ -71,16 +74,16 @@ for platform in cl.get_platforms():
                 }
                 """).build()
 
-        global_size = (data_points,)
-        local_size = (workers,)
+        global_size = (points,)
+        local_size = (ouvriers,)
         preferred_multiple = cl.Kernel(prg, 'sum').\
             get_work_group_info(cl.kernel_work_group_info.PREFERRED_WORK_GROUP_SIZE_MULTIPLE, device)
 
-        print("Data points:", data_points)
-        print("Workers:", workers)
+        print("Data points:", points)
+        print("Workers:", ouvriers)
         print("Preferred work group size multiple:", preferred_multiple)
 
-        if workers % preferred_multiple:
+        if ouvriers % preferred_multiple:
             print("Number of workers not a preferred multiple (%d*N)." % preferred_multiple)
             print("Performance may be reduced.")
 
@@ -88,11 +91,11 @@ for platform in cl.get_platforms():
         exec_evt.wait()
         elapsed = 1e-9*(exec_evt.profile.end - exec_evt.profile.start)
 
-        print("Execution time of test: %g s" % elapsed)
+        print(bcolor.WARNING + "Execution time of test:  " + bcolor.OKGREEN + str(elapsed) + " s" + bcolor.ENDC )
 
         c = numpy.empty_like(a)
         cl.enqueue_read_buffer(queue, destination_buf, c).wait()
-        equal = numpy.all(c == c_result)
+        equal = numpy.all(c == c_resultats)
 
         if not equal:
                 print("Results doesn't match!!")
