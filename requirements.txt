@@ -1,1 +1,4 @@
 babel
+PyQt5
+PySide
+qdarkstyle
