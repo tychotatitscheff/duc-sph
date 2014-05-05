@@ -18,6 +18,7 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
+import pytest
 
 # Following decorator is freely adapted from "Apprenez à programmer en python" from  'Vincent Le Golf' book
 def check_type_of_args(*spec_args, **spec_kwargs):
@@ -57,3 +58,26 @@ def check_type_of_args(*spec_args, **spec_kwargs):
             return called_function(*args, **kwargs)
         return modified_function
     return decorator
+
+
+if __name__ == "__main__":
+
+    @check_type_of_args(int)
+    def echo1(test: 'int', times: int=1) -> 'int':
+        return test * times
+
+    @check_type_of_args(int, times=int)
+    def echo2(test: 'int', times: int=1) -> 'int':
+        return test * times
+
+    echo1(2)
+    echo2(2, times=2)
+
+    with pytest.raises(TypeError):
+        echo1(2, a=4)
+    with pytest.raises(TypeError):
+        echo2()
+    with pytest.raises(TypeError):
+        echo2("a")
+    with pytest.raises(TypeError):
+        echo2(2, times="a")
