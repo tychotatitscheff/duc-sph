@@ -50,8 +50,8 @@ class UnionMeta(type):
     >>> issubclass(str, NumberOrString)
     True
     """
-    def __new__(mcls, name, bases, namespace):
-        cls = super().__new__(mcls, name, bases, namespace)
+    def __new__(mcs, name, bases, namespace):
+        cls = super().__new__(mcs, name, bases, namespace)
         types = getattr(cls, '__types__', None)
         if not isinstance(types, set):
             raise TypeError('Union requires a __types__ set')
@@ -97,8 +97,8 @@ class AnyTypeMeta(type):
     >>> issubclass(None, AnyType)
     True
     """
-    def __new__(mcls, name, bases, namespace):
-        return super().__new__(mcls, name, bases, namespace)
+    def __new__(mcs, name, bases, namespace):
+        return super().__new__(mcs, name, bases, namespace)
 
     def __instancecheck__(cls, instance):
         """Override for isinstance(instance, cls)."""
@@ -167,9 +167,9 @@ class InterfaceMeta(type):
     the interface.
 
     >>> class IterableWithLen(Interface):
-    ...     def __iter__():
+    ...     def __iter__(self):
     ...             pass
-    ...     def __len__():
+    ...     def __len__(self):
     ...             pass
     ...
     >>> isinstance([], IterableWithLen)
@@ -201,8 +201,8 @@ class InterfaceMeta(type):
     True
     """
 
-    def __new__(mcls, name, bases, namespace):
-        cls = super().__new__(mcls, name, bases, namespace)
+    def __new__(mcs, name, bases, namespace):
+        cls = super().__new__(mcs, name, bases, namespace)
         # TODO: check base classes, prevent multiple inheritance.
         cls.__signatures__ = {}
         cls.__attributes__ = {}
@@ -210,10 +210,10 @@ class InterfaceMeta(type):
             if name in ('__qualname__', '__module__', '__doc__'):
                 continue
             if inspect.isfunction(value):
-                mcls.add_method(cls, value)
+                mcs.add_method(cls, value)
                 continue
 
-            mcls.add_attribute(cls, name, value)
+            mcs.add_attribute(cls, name, value)
         return cls
 
     def __instancecheck__(cls, instance):
@@ -325,8 +325,8 @@ class PredicateMeta(type):
     >>> isinstance(0, Positive)
     False
     """
-    def __new__(mcls, name, bases, namespace):
-        return super().__new__(mcls, name, bases, namespace)
+    def __new__(mcs, name, bases, namespace):
+        return super().__new__(mcs, name, bases, namespace)
 
     def __instancecheck__(cls, instance):
         try:
