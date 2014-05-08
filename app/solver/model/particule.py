@@ -21,13 +21,13 @@ __status__ = "Production"
 from abc import ABCMeta, abstractmethod
 
 from app.solver.model import point, fluid, force, vector
-import tools.check_type_of_args as chk_typ
+import tools.annotation.typed as typed
 
 import pytest
 
 dict_type_particule = {}
-list_particule = []
-def_fluid = fluid.Fluid()
+list_particules = []
+def_fluid = fluid.Fluid(0)
 
 
 class _MetaParticule(ABCMeta):
@@ -46,7 +46,8 @@ class _Particule(metaclass=_MetaParticule):
     Generic abstract particule class.
     """
     @abstractmethod
-    def __init__(self, location, radius):
+    @typed.typechecked
+    def __init__(self, location: point.Point, radius: float=1.):
         """
         :type location: point.Point
         :type radius: float
@@ -95,8 +96,8 @@ class GhostParticule(_Particule):
 
 if __name__ == "__main__":
     pt = point.Point(1, 2, 3)
-    fl = fluid.Fluid()
-    A = ActiveParticule(pt, fl)
+    fl = fluid.Fluid(1)
+    A = ActiveParticule(pt, 2., fl)
     B = GhostParticule(pt)
     print(list_particule)
 

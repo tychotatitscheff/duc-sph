@@ -18,4 +18,13 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
-__all__ = ['fluid', 'force', 'particle', 'point' ]
+
+class Equation:
+    def __init__(self):
+        pass
+
+    def initialize(self):
+        pass
+
+    def loop(self):
+        pass
