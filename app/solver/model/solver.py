@@ -5,7 +5,7 @@ __author__ = "Clément Eberhardt," \
              "Clément Léost," \
              "Benoit Picq," \
              "Théo Subtil" \
-             "and Tycho Tatitscheff"
+             " and Tycho Tatitscheff"
 __copyright__ = "Copyright 2014, DucSph"
 __credits__ = ["Clément Eberhardt",
                "Clément Léost",
@@ -18,7 +18,7 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
-from app.solver.model import particule
+import app.solver.model.particule as m_part
 
 
 def decorable(cls):
@@ -34,7 +34,7 @@ class BaseSolver():
     def __init__(self, integration_step):
         self.__integration_step = integration_step
         self.__state_equations = dict()
-        self.__particules = particule.list_particules
+        self.__particules = m_part.list_particules
 
     @property
     def integration_step(self):
@@ -65,7 +65,7 @@ class Solver(BaseSolver):
     def __init__(self, solver):
         super().__init__(solver.integration_step)
         self.__solver = solver
-        self.__list_particules = particule.list_particules
+        self.__list_particules = m_part.list_particules
         self.__integration_step = solver.integration_step
         self.__state_equations = solver.state_equations
 

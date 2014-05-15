@@ -5,7 +5,7 @@ __author__ = "Clément Eberhardt," \
              "Clément Léost," \
              "Benoit Picq," \
              "Théo Subtil" \
-             "and Tycho Tatitscheff"
+             " and Tycho Tatitscheff"
 __copyright__ = "Copyright 2014, DucSph"
 __credits__ = ["Clément Eberhardt",
                "Clément Léost",

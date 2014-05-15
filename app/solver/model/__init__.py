@@ -5,7 +5,7 @@ __author__ = "Clément Eberhardt," \
              "Clément Léost," \
              "Benoit Picq," \
              "Théo Subtil" \
-             "and Tycho Tatitscheff"
+             " and Tycho Tatitscheff"
 __copyright__ = "Copyright 2014, DucSph"
 __credits__ = ["Clément Eberhardt",
                "Clément Léost",
@@ -17,5 +17,3 @@ __version__ = "1.0.1"
 __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
-
-__all__ = ['fluid', 'force', 'particle', 'point' ]
