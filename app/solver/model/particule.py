@@ -20,7 +20,7 @@ __status__ = "Production"
 
 from abc import ABCMeta, abstractmethod
 
-from app.solver.model import point, fluid, force, vector
+from app.solver.model import point, fluid, state, vector
 
 import pytest
 
@@ -53,7 +53,7 @@ class _Particule(metaclass=_MetaParticule):
         self.__location = location
         self.__radius = radius
 
-        self.__force = force.Force(vector.Vector([0, 0, 0]))
+        self.__force = state.Force(vector.Vector([0, 0, 0]))
 
         list_particules.append(self)
 
