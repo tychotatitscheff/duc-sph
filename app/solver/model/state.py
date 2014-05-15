@@ -21,12 +21,15 @@ __status__ = "Production"
 from app.solver.model import vector
 
 
-class Force():
+class State(object):
     """
-    This class define an directional force.
+    This class define a state (force, temp).
     """
-    def __init__(self, force):
-        """
-        :type force: vector.Vector
-        """
-        self.__force = force
+    def __init__(self, val):
+        self.__value = val
+
+
+class Force(State):
+    def __init__(self, val):
+        assert isinstance(val, vector.Vector)
+        super().__init__(val)

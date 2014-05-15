@@ -21,7 +21,6 @@ __status__ = "Production"
 from abc import ABCMeta, abstractmethod
 
 from app.solver.model import point, fluid, force, vector
-import tools.annotation.typed as typed
 
 import pytest
 
@@ -46,7 +45,6 @@ class _Particule(metaclass=_MetaParticule):
     Generic abstract particule class.
     """
     @abstractmethod
-    @typed.typechecked
     def __init__(self, location: point.Point, radius: float=1.):
         """
         :type location: point.Point
@@ -57,11 +55,11 @@ class _Particule(metaclass=_MetaParticule):
 
         self.__force = force.Force(vector.Vector([0, 0, 0]))
 
-        list_particule.append(self)
+        list_particules.append(self)
 
     def __del__(self):
         try:
-            list_particule.remove(self)
+            list_particules.remove(self)
         except ValueError:
             pass
 
@@ -71,7 +69,17 @@ class _Particule(metaclass=_MetaParticule):
 
     @loc.setter
     def loc(self, loc):
+        assert isinstance(loc, point.Point)
         self.__location = loc
+
+    @property
+    def rad(self):
+        return self.__radius
+
+    @rad.setter
+    def rad(self, rad):
+        assert isinstance(rad, float)
+        self.__radius = rad
 
 
 class ActiveParticule(_Particule):
@@ -84,6 +92,15 @@ class ActiveParticule(_Particule):
 
     def __del__(self):
         super().__del__()
+
+    @property
+    def fluid(self):
+        return self.__fluid
+
+    @fluid.setter
+    def fluid(self, flu):
+        assert isinstance(flu, fluid.Fluid)
+        self.__fluid = flu
 
 
 class GhostParticule(_Particule):
@@ -99,10 +116,11 @@ if __name__ == "__main__":
     fl = fluid.Fluid(1)
     A = ActiveParticule(pt, 2., fl)
     B = GhostParticule(pt)
-    print(list_particule)
-
+    print(list_particules)
+    print(A.loc)
+    A.loc = 4
     B.__del__()
-    print(list_particule)
+    print(list_particules)
 
     with pytest.raises(TypeError):
         C = _Particule()

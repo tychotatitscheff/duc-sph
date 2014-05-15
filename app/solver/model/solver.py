@@ -29,7 +29,7 @@ def decorable(cls):
 @decorable
 class BaseSolver():
     """
-    Basic class that can would be decorated.
+    Basic class that can be decorated.
     """
     def __init__(self, integration_step):
         self.__integration_step = integration_step
@@ -115,6 +115,7 @@ if __name__ == "__main__":
     state_equation = {'force': '12 x +4'}
     C = AddStateEquation(B, state_equation)
     D = DelStateEquation(C, 'force')
+    print(isinstance(D, Solver))
     E = ReplaceIntegrationMethod(C, lambda x: 2*x)
     print(E.integration_function(2))
     pass

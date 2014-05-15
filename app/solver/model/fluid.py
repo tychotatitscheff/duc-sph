@@ -19,7 +19,7 @@ __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
 
-class Fluid():
+class Fluid(object):
     """
     This class represent one kind of fluid.
     """
