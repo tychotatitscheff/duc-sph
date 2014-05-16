@@ -27,12 +27,13 @@ import app.solver.model.vector as m_vec
 import app.solver.model.fluid as m_fluid
 import app.solver.model.kernel as m_kern
 import app.solver.model.state as m_state
-import app.solver.model.hash as m_hash
+
+import app.solver.model.hash_table as m_hash
 
 import pytest
 
 dict_type_particule = {}
-hash_particule = m_hash.Hash(2, 800)
+hash_particule = m_hash.Hash(3, 20)
 def_fluid = m_fluid.Fluid(0)
 
 
@@ -59,7 +60,7 @@ class _Particule(metaclass=_MetaParticule):
         """
         self.__density = m_state.Density("rho of " + str(self.__hash__()), m_kern.DefaultKernel(RAD_MUL * radius), 1)
         self.__location = m_state.Position("Location of " + str(self.__hash__()), location)
-        self.__new_location = m_state.Position("Old location of " + str(self.__hash__()), location)
+        self.__future_location = m_state.Position("Old location of " + str(self.__hash__()), location)
         self.__radius = radius
 
         self.__forces = []
@@ -73,12 +74,9 @@ class _Particule(metaclass=_MetaParticule):
         except ValueError:
             pass
 
-    def __repr__(self):
-        return "Particule " + str(self.location.value)
-
     def update(self):
         hash_particule.update(self)
-        self.location = self.__new_location
+        self.location = self.future_location
 
     @property
     def location(self):
@@ -87,6 +85,14 @@ class _Particule(metaclass=_MetaParticule):
     @location.setter
     def location(self, loc):
         self.__location = loc
+
+    @property
+    def future_location(self):
+        return self.__future_location
+
+    @future_location.setter
+    def future_location(self, loc):
+        self.__future_location = loc
 
     @property
     def rad(self):
@@ -112,8 +118,8 @@ class _Particule(metaclass=_MetaParticule):
         except ValueError:
             pass
 
-    def neighbour(self):
-        return hash_particule.search(self, 2.5 * self.rad, approx=False)
+    def neighbour(self, h, approx=False):
+        return hash_particule.search(self, h, approx=approx)
 
 
 class ActiveParticule(_Particule):
@@ -159,17 +165,20 @@ class GhostParticule(_Particule):
 
 
 if __name__ == "__main__":
-    pt = m_vec.Vector([1, 2, 3])
+    print("")
+    pt1 = m_vec.Vector([100, 200, 300])
+    pt2 = m_vec.Vector([102, 201, 300])
     fl = m_fluid.Fluid(1)
-    A = ActiveParticule(pt, 2., fl)
-    B = GhostParticule(pt)
+    A = ActiveParticule(pt1, 2., fl)
+    B = GhostParticule(pt1)
+    C = ActiveParticule(pt2, 2., fl)
     kern = m_kern.SpikyKernel(4)
     st = m_state.Force("F_viscosity", kern, m_vec.Vector([0, 0, 0]))
-    print(list_particules)
-    print(A.loc)
-    A.loc = 4
+    print(hash_particule.hash_table)
     B.__del__()
-    print(list_particules)
+    print(hash_particule.hash_table)
+    neig = A.neighbour(5)
+    print(A.neighbour(5))
 
     with pytest.raises(TypeError):
         C = _Particule()

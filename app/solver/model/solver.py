@@ -31,10 +31,10 @@ class BaseSolver():
     """
     Basic class that can be decorated.
     """
-    def __init__(self, integration_step):
+    def __init__(self, integration_step=0.1):
         self.__integration_step = integration_step
         self.__state_equations = dict()
-        self.__particules = m_part.list_particules
+        self.__particules = m_part.hash_particule
 
     @property
     def integration_step(self):
@@ -65,7 +65,7 @@ class Solver(BaseSolver):
     def __init__(self, solver):
         super().__init__(solver.integration_step)
         self.__solver = solver
-        self.__list_particules = m_part.list_particules
+        self.__list_particules = m_part.hash_particule
         self.__integration_step = solver.integration_step
         self.__state_equations = solver.state_equations
 
@@ -88,33 +88,11 @@ class ReplaceRun(Solver):
         self.run = method
 
 
-class AddStateEquation(Solver):
-    def __init__(self, solver, state_equation: dict):
-        super().__init__(solver)
-        self.retract = None
-        for (key, value) in state_equation.items():
-            if key not in self.state_equations:
-                self.state_equations[key] = value
-
-
-def add_state_equation(solver, state_equation):
-    return AddStateEquation(solver, state_equation)
-
-
-class DelStateEquation(Solver):
-    def __init__(self, solver, state):
-        super().__init__(solver)
-        self.retract = None
-        if state in self.state_equations:
-            del self.state_equations[state]
-
 
 if __name__ == "__main__":
     A = BaseSolver(10)
     B = Solver(A)
     state_equation = {'force': '12 x +4'}
-    C = AddStateEquation(B, state_equation)
-    D = DelStateEquation(C, 'force')
     print(isinstance(D, Solver))
     E = ReplaceIntegrationMethod(C, lambda x: 2*x)
     print(E.integration_function(2))
