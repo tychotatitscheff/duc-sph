@@ -20,7 +20,7 @@ __status__ = "Production"
 
 import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
-#import app.solver.model.particule as m_part
+import app.solver.model.particule as m_part
 
 class State(object):
     """
@@ -63,16 +63,33 @@ class Density(EstimatedState):
         self.__kernel = kern
         self.__unit = "kg / m^3"
 
-    def factor(self):
-        pass
+    @staticmethod
+    def factor(neighbour):
+        return neighbour.mass
 
     def __call__(self, particle, neighbour):
-        #assert isinstance(neighbour, list)
-        resultant = m_vec.Vector([0, 0, 0])
+        density = 0
         for n in neighbour:
-            r = particle.location.value - neighbour.location.value
-            force = self.factor() * self.__kernel.gradient(r)
-            pass
+            r = particle.location.value - n.location.value
+            density += self.factor(n) * self.__kernel.__call__(r)
+        self.value = density
+
+
+class Pressure(EstimatedState):
+    def __init__(self, name, val):
+        assert isinstance(val, float) or isinstance(val, int)
+        #assert isinstance(kernel, m_kern.Kernel)
+        super().__init__(name, val)
+        self.__unit = "Pa"
+
+    @staticmethod
+    def factor(particle: m_part.ActiveParticule):
+        return particle.density.value * particle.fluid.k
+
+    def __call__(self, particle):
+        pressure = self.factor(particle)
+        self.value = pressure
+
 
 class Force(EstimatedState):
     def __init__(self, name, kern: m_kern.Kernel, val):

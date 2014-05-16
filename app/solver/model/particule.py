@@ -22,6 +22,7 @@ RAD_MUL = 2
 
 from abc import ABCMeta, abstractmethod
 
+from math import *
 
 import app.solver.model.vector as m_vec
 import app.solver.model.fluid as m_fluid
@@ -33,9 +34,11 @@ import app.solver.model.hash_table as m_hash
 import pytest
 
 dict_type_particule = {}
-hash_particule = m_hash.Hash(3, 20)
-def_fluid = m_fluid.Fluid(0)
 
+def_fluid = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
+
+ATMOSPHERIC_PRESSURE = 1
+GRAVITY = 9.8
 
 class _MetaParticule(ABCMeta):
     """
@@ -53,7 +56,7 @@ class _Particule(metaclass=_MetaParticule):
     Generic abstract particule class.
     """
     @abstractmethod
-    def __init__(self, location: m_vec, radius: float=1.):
+    def __init__(self, hash_particule, location: m_vec, radius: float=1.):
         """
         :type location: point.Point
         :type radius: float
@@ -65,17 +68,17 @@ class _Particule(metaclass=_MetaParticule):
 
         self.__forces = []
         self.__force_res = m_vec.Vector([0, 0, 0])
-
-        hash_particule.insert(self)
+        self.__hash_particule = hash_particule
+        self.__hash_particule.insert(self)
 
     def __del__(self):
         try:
-            hash_particule.remove(self)
+            self.__hash_particule.remove(self)
         except ValueError:
             pass
 
     def update(self):
-        hash_particule.update(self)
+        self.__hash_particule.update(self)
         self.location = self.future_location
 
     @property
@@ -95,11 +98,11 @@ class _Particule(metaclass=_MetaParticule):
         self.__future_location = loc
 
     @property
-    def rad(self):
+    def radius(self):
         return self.__radius
 
-    @rad.setter
-    def rad(self, rad):
+    @radius.setter
+    def radius(self, rad):
         assert isinstance(rad, float)
         self.__radius = rad
 
@@ -119,18 +122,19 @@ class _Particule(metaclass=_MetaParticule):
             pass
 
     def neighbour(self, h, approx=False):
-        return hash_particule.search(self, h, approx=approx)
+        return self.__hash_particule.search(self, h, approx=approx)
 
 
 class ActiveParticule(_Particule):
-    def __init__(self, location, radius, fluid=def_fluid):
+    def __init__(self, hash_particule, location, radius, fluid=def_fluid):
         """
         :type fluid: fluid.Fluid
         """
-        super().__init__(location, radius)
+        super().__init__(hash_particule, location, radius)
         self.__fluid = fluid
         self.__density = m_state.Density("rho of " + str(self.__hash__()),
                                          m_kern.DefaultKernel(RAD_MUL * radius), fluid.rho0)
+        self.__pressure = m_state.Pressure("P of " + str(self.__hash__()), ATMOSPHERIC_PRESSURE)
 
     def __del__(self):
         super().__del__()
@@ -148,6 +152,14 @@ class ActiveParticule(_Particule):
         return self.__density
 
     @property
+    def pressure(self):
+        return self.__pressure
+
+    @property
+    def mass(self):
+        return 4/3 * pi * (self.radius ** 3) * self.fluid.rho0
+
+    @property
     def rho(self):
         return self.__density.value
 
@@ -157,8 +169,8 @@ class ActiveParticule(_Particule):
 
 
 class GhostParticule(_Particule):
-    def __init__(self, location):
-        super().__init__(location)
+    def __init__(self, hash_particule, location, radius):
+        super().__init__(hash_particule, location, radius)
 
     def __del__(self):
         super().__del__()
@@ -168,15 +180,17 @@ if __name__ == "__main__":
     print("")
     pt1 = m_vec.Vector([100, 200, 300])
     pt2 = m_vec.Vector([102, 201, 300])
-    fl = m_fluid.Fluid(1)
-    A = ActiveParticule(pt1, 2., fl)
-    B = GhostParticule(pt1)
-    C = ActiveParticule(pt2, 2., fl)
+    fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
+    hashing = m_hash.Hash(1, 1000)
+    A = ActiveParticule(hashing, pt1, 2., fl)
+    B = GhostParticule(hashing, pt1, 2.)
+    C = ActiveParticule(hashing, pt2, 2., fl)
     kern = m_kern.SpikyKernel(4)
     st = m_state.Force("F_viscosity", kern, m_vec.Vector([0, 0, 0]))
-    print(hash_particule.hash_table)
+
+
     B.__del__()
-    print(hash_particule.hash_table)
+
     neig = A.neighbour(5)
     print(A.neighbour(5))
 
