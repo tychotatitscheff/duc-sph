@@ -20,7 +20,7 @@ __status__ = "Production"
 
 import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
-
+#import app.solver.model.particule as m_part
 
 class State(object):
     """
@@ -55,8 +55,27 @@ class IntegratedState(State):
     pass
 
 
+class Density(EstimatedState):
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        assert isinstance(val, float) or isinstance(val, int)
+        #assert isinstance(kernel, m_kern.Kernel)
+        super().__init__(name, val)
+        self.__kernel = kern
+        self.__unit = "kg / m^3"
+
+    def factor(self):
+        pass
+
+    def __call__(self, particle, neighbour):
+        #assert isinstance(neighbour, list)
+        resultant = m_vec.Vector([0, 0, 0])
+        for n in neighbour:
+            r = particle.location.value - neighbour.location.value
+            force = self.factor() * self.__kernel.gradient(r)
+            pass
+
 class Force(EstimatedState):
-    def __init__(self, name, kern, val):
+    def __init__(self, name, kern: m_kern.Kernel, val):
         assert isinstance(val, m_vec.Vector)
         #assert isinstance(kernel, m_kern.Kernel)
         super().__init__(name, val)
@@ -66,21 +85,23 @@ class Force(EstimatedState):
     def factor(self):
         pass
 
-    def __call__(self, neighbour):
+    def __call__(self, particle, neighbour):
         #assert isinstance(neighbour, list)
-        result = m_vec.Vector([0, 0, 0])
+        resultant = m_vec.Vector([0, 0, 0])
         for n in neighbour:
-
+            r = particle.loc.value - neighbour.loc.value
+            force = self.factor() * self.__kernel.gradient(r)
             pass
 
 
 class Position(IntegratedState):
-    def __init__(self, name, kern, val):
+    def __init__(self, name,  val):
+        """
+
+        """
         assert isinstance(val, m_vec.Vector)
-        #assert isinstance(kernel, m_kern.Kernel)
         super().__init__(name, val)
-        self.__kernel = kern
-        self.__unit = "N"
+        self.__unit = "m"
 
 if __name__ == "__main__":
     ker = m_kern.Kernel(10)

@@ -18,17 +18,21 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
+RAD_MUL = 2
+
 from abc import ABCMeta, abstractmethod
 
 
-import app.solver.model.point as m_point
+import app.solver.model.vector as m_vec
 import app.solver.model.fluid as m_fluid
+import app.solver.model.kernel as m_kern
 import app.solver.model.state as m_state
+import app.solver.model.hash as m_hash
 
 import pytest
 
 dict_type_particule = {}
-list_particules = []
+hash_particule = m_hash.Hash(2, 800)
 def_fluid = m_fluid.Fluid(0)
 
 
@@ -48,30 +52,40 @@ class _Particule(metaclass=_MetaParticule):
     Generic abstract particule class.
     """
     @abstractmethod
-    def __init__(self, location: m_point.Point, radius: float=1.):
+    def __init__(self, location: m_vec, radius: float=1.):
         """
         :type location: point.Point
         :type radius: float
         """
-        self.__location = location
+        self.__density = m_state.Density("rho of " + str(self.__hash__()), m_kern.DefaultKernel(RAD_MUL * radius), 1)
+        self.__location = m_state.Position("Location of " + str(self.__hash__()), location)
+        self.__new_location = m_state.Position("Old location of " + str(self.__hash__()), location)
         self.__radius = radius
 
-        self.__states = dict()
+        self.__forces = []
+        self.__force_res = m_vec.Vector([0, 0, 0])
 
-        list_particules.append(self)
+        hash_particule.insert(self)
 
     def __del__(self):
         try:
-            list_particules.remove(self)
+            hash_particule.remove(self)
         except ValueError:
             pass
 
+    def __repr__(self):
+        return "Particule " + str(self.location.value)
+
+    def update(self):
+        hash_particule.update(self)
+        self.location = self.__new_location
+
     @property
-    def loc(self):
+    def location(self):
         return self.__location
 
-    @loc.setter
-    def loc(self, loc):
+    @location.setter
+    def location(self, loc):
         self.__location = loc
 
     @property
@@ -85,27 +99,32 @@ class _Particule(metaclass=_MetaParticule):
 
     @property
     def states(self):
-        return self.__states
+        return self.__forces
 
-    def append_state(self, _state: m_state.State):
-        assert isinstance(_state, m_state.State)
-        self.__states[_state.name] = _state
+    def append_force(self, state: m_state.State):
+        assert isinstance(state, m_state.State)
+        self.__forces.append(state)
 
-    def delete_state(self, _state: m_state.State):
-        assert isinstance(_state, m_state.State)
+    def delete_state(self, state: m_state.State):
+        assert isinstance(state, m_state.State)
         try:
-            del self.__states[_state.name]
-        except KeyError:
-            print("Not in selected directory")
+            self.__forces.remove(state)
+        except ValueError:
+            pass
+
+    def neighbour(self):
+        return hash_particule.search(self, 2.5 * self.rad, approx=False)
 
 
 class ActiveParticule(_Particule):
-    def __init__(self, location, radius, _fluid=def_fluid):
+    def __init__(self, location, radius, fluid=def_fluid):
         """
-        :type _fluid: fluid.Fluid
+        :type fluid: fluid.Fluid
         """
         super().__init__(location, radius)
-        self.__fluid = _fluid
+        self.__fluid = fluid
+        self.__density = m_state.Density("rho of " + str(self.__hash__()),
+                                         m_kern.DefaultKernel(RAD_MUL * radius), fluid.rho0)
 
     def __del__(self):
         super().__del__()
@@ -118,20 +137,34 @@ class ActiveParticule(_Particule):
     def fluid(self, flu):
         self.__fluid = flu
 
+    @property
+    def density(self):
+        return self.__density
+
+    @property
+    def rho(self):
+        return self.__density.value
+
+    @property
+    def rho0(self):
+        return self.fluid.rho
+
 
 class GhostParticule(_Particule):
-    def __init__(self, loc: m_point.Point):
-        super().__init__(loc)
+    def __init__(self, location):
+        super().__init__(location)
 
     def __del__(self):
         super().__del__()
 
 
 if __name__ == "__main__":
-    pt = m_point.Point(1, 2, 3)
+    pt = m_vec.Vector([1, 2, 3])
     fl = m_fluid.Fluid(1)
     A = ActiveParticule(pt, 2., fl)
     B = GhostParticule(pt)
+    kern = m_kern.SpikyKernel(4)
+    st = m_state.Force("F_viscosity", kern, m_vec.Vector([0, 0, 0]))
     print(list_particules)
     print(A.loc)
     A.loc = 4

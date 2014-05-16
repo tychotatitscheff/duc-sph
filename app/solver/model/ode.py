@@ -19,15 +19,22 @@ __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
 
-class Fluid(object):
+class ODE(object):
     """
-    This class represent one kind of fluid.
-    """
-    def __init__(self, rho0):
-        self.__rho0 = rho0
-        self.__k = 0
-        pass
+    We want solve this kind of ODE : a * x'' + b * x' + c * x = d
 
-    @property
-    def rho0(self):
-        return self.__rho0
+    Programming of Differential Equations
+    (Appendix E)
+    Hans Petter Langtangen
+    Simula Research Laboratory
+    University of Oslo, Dept. of Informatics
+    """
+    def __init__(self, a, b, c, d):
+        # Constant Terms
+        self.__a = a
+        self.__b = b
+        self.__c = c
+        self.__d = d
+
+    def __call__(self, u: list):
+        return [u[1], - self.__b * u[1] / self.__a - self.__c * u[0] / self.__a]

@@ -17,10 +17,3 @@ __version__ = "1.0.1"
 __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
-
-
-class Point():
-    def __init__(self, x, y, z):
-        __x = x
-        __y = y
-        __z = z
