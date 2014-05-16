@@ -29,20 +29,19 @@ class Kernel(object):
     """
     def __init__(self, h):
         self.__h = h  # max radius
-        pass
 
     @property
     def h(self):
         return self.__h
 
     def __call__(self, r):
-        pass
+        raise NotImplementedError
 
     def gradient(self, r):
-        pass
+        raise NotImplementedError
 
     def laplacian(self, r):
-        pass
+        raise NotImplementedError
 
 
 class DefaultKernel(Kernel):
@@ -53,7 +52,7 @@ class DefaultKernel(Kernel):
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
     # TODO : Implementer le kernel par default
-    pass
+    raise NotImplementedError
 
 
 class SpikyKernel(Kernel):
@@ -99,7 +98,7 @@ class ViscosityKernel(Kernel):
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
     # TODO : implementer le kernel viscosity
-    pass
+    raise NotImplementedError
 
 
 if __name__ == "__main__":
