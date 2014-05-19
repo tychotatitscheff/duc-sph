@@ -58,6 +58,8 @@ class IntegratedState(State):
 class Density(EstimatedState):
     def __init__(self, name, kern: m_kern.Kernel, val):
         assert isinstance(val, float) or isinstance(val, int)
+        if isinstance(val, int):
+            val = float(val)
         #assert isinstance(kernel, m_kern.Kernel)
         super().__init__(name, val)
         self.__kernel = kern
@@ -99,7 +101,7 @@ class Force(EstimatedState):
         self.__kernel = kern
         self.__unit = "N"
 
-    def factor(self):
+    def factor(self, particle, n):
         pass
 
     def __call__(self, particle, neighbour):
@@ -107,8 +109,18 @@ class Force(EstimatedState):
         resultant = m_vec.Vector([0, 0, 0])
         for n in neighbour:
             r = particle.loc.value - neighbour.loc.value
-            force = self.factor() * self.__kernel.gradient(r)
-            pass
+            resultant += self.factor(particle, n) * self.__kernel.gradient(r)
+        self.value = resultant
+        return resultant
+
+
+class ForceViscosity(Force):
+    def factor(self, particle, n):
+        assert isinstance(particle, m_part.ActiveParticule)
+        assert isinstance(n, m_part.ActiveParticule)
+        if n is not particle:
+            return - particle.density * ((particle.pressure / particle.density ** 2)
+                                         + (n.pressure / n.density ** 2)) * n.mass
 
 
 class Position(IntegratedState):
@@ -121,10 +133,5 @@ class Position(IntegratedState):
         self.__unit = "m"
 
 if __name__ == "__main__":
-    ker = m_kern.Kernel(10)
-    A = Force("Fg", ker, m_vec.Vector([10, 11, 13]))
-    A("test")
-    B = State("test", 10)
-    A.__call__("test")
-    pass
+    kern = m_kern.SpikyKernel(10)
 
