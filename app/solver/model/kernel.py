@@ -118,8 +118,32 @@ class ViscosityKernel(Kernel):
     M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
-    # TODO : implementer le kernel viscosity
-    raise NotImplementedError
+
+    def __call__(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm <= h:
+            return 15 / (2 * pi * h ** 3) * (- r.norm ** 3 / (2 * h ** 3) +
+            r.norm() ** 2 / (h ** 2) + h / (2 * r.norm()) - 1)
+        else:
+            return 0
+
+    def gradient(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm <= h:
+            return 15 / (2 * pi * h ** 3) * r * (- 3 * r.norm() / (2 * h ** 3) +
+            2 / (h ** 2) - h / (2 * r.norm() ** 3))
+        else:
+            return 0
+
+    def laplacian(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm <= h:
+            return 45 / (pi * h ** 6) * (h - r.norm())
+        else:
+            return 0
 
 
 if __name__ == "__main__":
