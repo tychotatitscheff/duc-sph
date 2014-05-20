@@ -42,3 +42,7 @@ class Fluid(object):
     @property
     def k(self):
         return self.__k
+
+    @property
+    def mu(self):
+        return self.__mu

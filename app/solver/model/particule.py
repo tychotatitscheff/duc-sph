@@ -135,6 +135,8 @@ class ActiveParticule(_Particule):
         self.__density = m_state.Density("rho of " + str(self.__hash__()),
                                          m_kern.DefaultKernel(RAD_MUL * radius), fluid.rho0)
         self.__pressure = m_state.Pressure("P of " + str(self.__hash__()), ATMOSPHERIC_PRESSURE)
+        self.__mass = 0
+        self.__velocity = 0
 
     def __del__(self):
         super().__del__()
@@ -159,6 +161,10 @@ class ActiveParticule(_Particule):
     def mass(self):
         return 4/3 * pi * (self.radius ** 3) * self.fluid.rho0
 
+    @mass.setter
+    def mass(self, masse):
+        self.__mass = masse
+
     @property
     def rho(self):
         return self.__density.value
@@ -166,6 +172,10 @@ class ActiveParticule(_Particule):
     @property
     def rho0(self):
         return self.fluid.rho
+
+    @property
+    def velocity(self):
+        return self.__velocity
 
 
 class GhostParticule(_Particule):

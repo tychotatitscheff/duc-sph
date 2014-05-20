@@ -22,10 +22,12 @@ import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
 import app.solver.model.particule as m_part
 
+
 class State(object):
     """
     This class defines a state (force, temp).
     """
+
     def __init__(self, name, val):
         self.__value = val
         self.__name = name
@@ -91,7 +93,7 @@ class Pressure(EstimatedState):
         self.value = pressure
 
 
-class Force(EstimatedState):
+class ForcePre(EstimatedState):
     def __init__(self, name, kern: m_kern.Kernel, val):
         assert isinstance(val, m_vec.Vector)
         #assert isinstance(kernel, m_kern.Kernel)
@@ -99,26 +101,81 @@ class Force(EstimatedState):
         self.__kernel = kern
         self.__unit = "N"
 
-    def factor(self):
-        pass
+    @staticmethod
+    def factor(neighbour, particle: m_part.ActiveParticule):
+        mj = neighbour.mass
+        rhoj = neighbour.density
+        rhoi = particle.density
+        pj = neighbour.pressure
+        pi = particle.pressure
+        return -mj * rhoi * (pi / (rhoi * rhoi) + pj / (rhoj * rhoj))
 
     def __call__(self, particle, neighbour):
         #assert isinstance(neighbour, list)
         resultant = m_vec.Vector([0, 0, 0])
         for n in neighbour:
             r = particle.loc.value - neighbour.loc.value
-            force = self.factor() * self.__kernel.gradient(r)
+            forcepre += self.factor(n, particle) * self.__kernel.gradient(r)
             pass
 
 
+class ForceVis(EstimatedState):
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        assert isinstance(val, m_vec.Vector)
+        #assert isinstance(kernel, m_kern.Kernel)
+        super().__init__(name, val)
+        self.__kernel = kern
+        self.__unit = "N"
+
+    @staticmethod
+    def factor(neighbour, particle: m_part.ActiveParticule):
+        mj = neighbour.mass
+        rhoj = neighbour.density
+        mu = particle.fluid.mu
+        return mu * mj / rhoj
+
+    def __call__(self, particle, neighbour):
+        #assert isinstance(neighbour, list)
+        resultant = m_vec.Vector([0, 0, 0])
+        ui = particle.velocity
+        for n in neighbour:
+            uj = neighbour.velocity
+            r = particle.loc.value - neighbour.loc.value
+            forcevis += self.factor(n, particle) * (uj - ui) * self.__kernel.laplacian(r)
+            pass
+
+
+class FExter(EstimatedState):
+    def __init__(self, name, val):
+        assert isinstance(val, m_vec.Vector)
+        #assert isinstance(kernel, m_kern.Kernel)
+        super().__init__(name, val)
+        self.__unit = "N"
+        "à completer"
+
+
+class FGravity(EstimatedState):
+    def __init__(self, name, val):
+        assert isinstance(val, m_vec.Vector)
+        #assert isinstance(kernel, m_kern.Kernel)
+        super().__init__(name, val)
+        self.__unit = "N"
+
+    def __call__(self, particle):
+        #assert isinstance(neighbour, list)
+        resultant = m_vec.Vector([0, 0, 0])
+        fgravity = particle.density * gravity
+
+
 class Position(IntegratedState):
-    def __init__(self, name,  val):
+    def __init__(self, name, val):
         """
 
         """
         assert isinstance(val, m_vec.Vector)
         super().__init__(name, val)
         self.__unit = "m"
+
 
 if __name__ == "__main__":
     ker = m_kern.Kernel(10)
