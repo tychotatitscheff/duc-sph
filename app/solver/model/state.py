@@ -79,6 +79,28 @@ class Density(EstimatedState):
         self.value = density
 
 
+class ColorField(EstimatedState):
+    """
+    Page 25
+
+    M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
+    Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
+    """
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        super().__init__(name, val)
+        self.__kernel = kern
+
+    @staticmethod
+    def factor(neighbour):
+        return neighbour.mass / neighbour.rho
+
+    def __call__(self, particle, neighbour):
+        color = 0
+        for n in neighbour:
+            r = particle.location.value - n.location.value
+            color += self.factor(n) * self.__kernel.__call__(r)
+
+
 class Pressure(EstimatedState):
     def __init__(self, name, val):
         assert isinstance(val, float) or isinstance(val, int)
@@ -122,7 +144,6 @@ class Force(EstimatedState):
                 uj = n.velocity
                 resultant += self.factor(n, particle) * (uj - ui) * self.__kernel.laplacian(r)
         self.value = resultant
-
         return resultant
 
 
@@ -152,8 +173,14 @@ class ForceViscosity(Force):
 
 class ForceGravity(Force):
     type = "Gravity"
+    
 
-
+class Speed(IntegratedState):
+    def __init__(self, name, val):
+        assert isinstance(val, m_vec.Vector)
+        super().__init__(name, val)
+        self.__unit = "m/s"
+        
 
 class Position(IntegratedState):
     def __init__(self, name, val):
