@@ -22,10 +22,12 @@ import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
 import app.solver.model.particule as m_part
 
+
 class State(object):
     """
     This class defines a state (force, temp).
     """
+
     def __init__(self, name, val):
         self.__value = val
         self.__name = name
@@ -100,31 +102,61 @@ class Force(EstimatedState):
         super().__init__(name, val)
         self.__kernel = kern
         self.__unit = "N"
+        self.__type = "general"
 
     def factor(self, particle, n):
-        pass
+        return 1
 
     def __call__(self, particle, neighbour):
         #assert isinstance(neighbour, list)
         resultant = m_vec.Vector([0, 0, 0])
-        for n in neighbour:
-            r = particle.loc.value - neighbour.loc.value
-            resultant += self.factor(particle, n) * self.__kernel.gradient(r)
+        if type == "PressureForce":
+            for n in neighbour:
+                r = particle.loc.value - neighbour.loc.value
+                resultant += self.factor(particle, n) * self.__kernel.gradient(r)
+
+        elif type == "Viscosity force":
+            ui = particle.velocity
+            for n in neighbour:
+                r = particle.loc.value - neighbour.loc.value
+                uj = n.velocity
+                resultant += self.factor(n, particle) * (uj - ui) * self.__kernel.laplacian(r)
         self.value = resultant
+
         return resultant
 
 
-class ForceViscosity(Force):
+class ForcePressure(Force):
+    type = "PressureForce"
+
     def factor(self, particle, n):
         assert isinstance(particle, m_part.ActiveParticule)
         assert isinstance(n, m_part.ActiveParticule)
-        if n is not particle:
-            return - particle.density * ((particle.pressure / particle.density ** 2)
-                                         + (n.pressure / n.density ** 2)) * n.mass
+
+        mj = n.mass
+        rhoj = n.density
+        rhoi = particle.density
+        pj = n.pressure
+        pi = particle.pressure
+        return -mj * rhoi * (pi / (rhoi * rhoi) + pj / (rhoj ** 2))
+
+
+class ForceViscosity(Force):
+    type = "ViscosityForce"
+
+    def factor(self, particle, n):
+        mj = n.mass
+        rhoj = n.density
+        mu = particle.fluid.mu
+        return mu * mj / rhoj
+
+class ForceGravity(Force):
+    type = "Gravity"
+
 
 
 class Position(IntegratedState):
-    def __init__(self, name,  val):
+    def __init__(self, name, val):
         """
 
         """
@@ -132,6 +164,8 @@ class Position(IntegratedState):
         super().__init__(name, val)
         self.__unit = "m"
 
+
 if __name__ == "__main__":
     kern = m_kern.SpikyKernel(10)
-
+    V = ForceViscosity("sals", kern, m_vec.Vector([1, 0, 2]))
+    print("toto")
