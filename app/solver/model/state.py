@@ -22,12 +22,10 @@ import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
 import app.solver.model.particule as m_part
 
-
 class State(object):
     """
     This class defines a state (force, temp).
     """
-
     def __init__(self, name, val):
         self.__value = val
         self.__name = name
@@ -60,6 +58,8 @@ class IntegratedState(State):
 class Density(EstimatedState):
     def __init__(self, name, kern: m_kern.Kernel, val):
         assert isinstance(val, float) or isinstance(val, int)
+        if isinstance(val, int):
+            val = float(val)
         #assert isinstance(kernel, m_kern.Kernel)
         super().__init__(name, val)
         self.__kernel = kern
@@ -93,7 +93,7 @@ class Pressure(EstimatedState):
         self.value = pressure
 
 
-class ForcePre(EstimatedState):
+class Force(EstimatedState):
     def __init__(self, name, kern: m_kern.Kernel, val):
         assert isinstance(val, m_vec.Vector)
         #assert isinstance(kernel, m_kern.Kernel)
@@ -101,74 +101,30 @@ class ForcePre(EstimatedState):
         self.__kernel = kern
         self.__unit = "N"
 
-    @staticmethod
-    def factor(neighbour, particle: m_part.ActiveParticule):
-        mj = neighbour.mass
-        rhoj = neighbour.density
-        rhoi = particle.density
-        pj = neighbour.pressure
-        pi = particle.pressure
-        return -mj * rhoi * (pi / (rhoi * rhoi) + pj / (rhoj * rhoj))
+    def factor(self, particle, n):
+        pass
 
     def __call__(self, particle, neighbour):
         #assert isinstance(neighbour, list)
         resultant = m_vec.Vector([0, 0, 0])
         for n in neighbour:
             r = particle.loc.value - neighbour.loc.value
-            forcepre += self.factor(n, particle) * self.__kernel.gradient(r)
-            pass
+            resultant += self.factor(particle, n) * self.__kernel.gradient(r)
+        self.value = resultant
+        return resultant
 
 
-class ForceVis(EstimatedState):
-    def __init__(self, name, kern: m_kern.Kernel, val):
-        assert isinstance(val, m_vec.Vector)
-        #assert isinstance(kernel, m_kern.Kernel)
-        super().__init__(name, val)
-        self.__kernel = kern
-        self.__unit = "N"
-
-    @staticmethod
-    def factor(neighbour, particle: m_part.ActiveParticule):
-        mj = neighbour.mass
-        rhoj = neighbour.density
-        mu = particle.fluid.mu
-        return mu * mj / rhoj
-
-    def __call__(self, particle, neighbour):
-        #assert isinstance(neighbour, list)
-        resultant = m_vec.Vector([0, 0, 0])
-        ui = particle.velocity
-        for n in neighbour:
-            uj = neighbour.velocity
-            r = particle.loc.value - neighbour.loc.value
-            forcevis += self.factor(n, particle) * (uj - ui) * self.__kernel.laplacian(r)
-            pass
-
-
-class FExter(EstimatedState):
-    def __init__(self, name, val):
-        assert isinstance(val, m_vec.Vector)
-        #assert isinstance(kernel, m_kern.Kernel)
-        super().__init__(name, val)
-        self.__unit = "N"
-        "à completer"
-
-
-class FGravity(EstimatedState):
-    def __init__(self, name, val):
-        assert isinstance(val, m_vec.Vector)
-        #assert isinstance(kernel, m_kern.Kernel)
-        super().__init__(name, val)
-        self.__unit = "N"
-
-    def __call__(self, particle):
-        #assert isinstance(neighbour, list)
-        resultant = m_vec.Vector([0, 0, 0])
-        fgravity = particle.density * gravity
+class ForceViscosity(Force):
+    def factor(self, particle, n):
+        assert isinstance(particle, m_part.ActiveParticule)
+        assert isinstance(n, m_part.ActiveParticule)
+        if n is not particle:
+            return - particle.density * ((particle.pressure / particle.density ** 2)
+                                         + (n.pressure / n.density ** 2)) * n.mass
 
 
 class Position(IntegratedState):
-    def __init__(self, name, val):
+    def __init__(self, name,  val):
         """
 
         """
@@ -176,12 +132,6 @@ class Position(IntegratedState):
         super().__init__(name, val)
         self.__unit = "m"
 
-
 if __name__ == "__main__":
-    ker = m_kern.Kernel(10)
-    A = Force("Fg", ker, m_vec.Vector([10, 11, 13]))
-    A("test")
-    B = State("test", 10)
-    A.__call__("test")
-    pass
+    kern = m_kern.SpikyKernel(10)
 
