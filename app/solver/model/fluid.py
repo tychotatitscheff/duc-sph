@@ -21,7 +21,6 @@ __status__ = "Production"
 
 from math import *
 
-
 class Fluid(object):
     """
     This class represent one kind of fluid.
@@ -44,16 +43,6 @@ class Fluid(object):
     def k(self):
         return self.__k
 
-
     @property
     def mu(self):
         return self.__mu
-
-
-    @property
-    def b(self):
-        return self.__b
-
-    @property
-    def sigma(self):
-        return self.__sigma

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from IPython.core.pylabtools import select_figure_format
 
 __author__ = "Clément Eberhardt," \
              "Clément Léost," \
