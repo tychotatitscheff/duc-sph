@@ -65,6 +65,7 @@ class _Particule(metaclass=_MetaParticule):
         self.__location = m_state.Position("Location of " + str(self.__hash__()), location)
         self.__future_location = m_state.Position("Old location of " + str(self.__hash__()), location)
         self.__radius = radius
+        self.__speed = m_state.Speed("Speed of" + str(self.__hash__()), speed)
 
         self.__forces = []
         self.__force_res = m_vec.Vector([0, 0, 0])

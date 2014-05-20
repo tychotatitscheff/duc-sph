@@ -22,6 +22,7 @@ import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
 import app.solver.model.particule as m_part
 
+
 class State(object):
     """
     This class defines a state (force, temp).
@@ -115,12 +116,38 @@ class Force(EstimatedState):
 
 
 class PressureForce(Force):
+    """
+    Page 17
+
+    M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
+    Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
+    """
     def factor(self, particle, n):
         assert isinstance(particle, m_part.ActiveParticule)
         assert isinstance(n, m_part.ActiveParticule)
         if n is not particle:
             return - particle.density * ((particle.pressure / particle.density ** 2)
                                          + (n.pressure / n.density ** 2)) * n.mass
+
+
+class ViscosityForce(Force):
+    """Page 22
+
+    M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
+    Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
+    """
+    def factor(self, particle, n):
+        assert isinstance(particle, m_part.ActiveParticule)
+        assert isinstance(n, m_part.ActiveParticule)
+        if n is not particle:
+            return particle.fluid.mu * (n.speed - particle.speed) * n.mass / n.rho
+
+
+class Speed(IntegratedState):
+    def __init__(self, name, val):
+        assert isinstance(val, m_vec.Vector)
+        super().__init__(name, val)
+        self.__unit = "m/s"
 
 
 class Position(IntegratedState):
