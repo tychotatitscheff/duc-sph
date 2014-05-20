@@ -172,6 +172,7 @@ class ForceViscosity(Force):
         mu = particle.fluid.mu
         return mu * mj / rhoj
 
+
 class ForceGravity(Force):
     type = "Gravity"
     
