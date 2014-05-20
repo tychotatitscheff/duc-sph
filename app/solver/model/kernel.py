@@ -51,8 +51,29 @@ class DefaultKernel(Kernel):
     M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
-    # TODO : Implementer le kernel par default
-    raise NotImplementedError
+    def __call__(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 315/(64 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) ** 3
+        else:
+            return 0
+
+    def gradient(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return -945/(32 * pi * h ** 9) * r * (h ** 2 - r.norm() ** 2) ** 2
+        else:
+            return 0
+
+    def laplacian(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return -945/(32 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) * (3 * h **2 - 7 * r.norm() ** 2)
+        else:
+            return 0
 
 
 class SpikyKernel(Kernel):

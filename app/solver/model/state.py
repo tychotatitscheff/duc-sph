@@ -114,7 +114,7 @@ class Force(EstimatedState):
         return resultant
 
 
-class ForceViscosity(Force):
+class PressureForce(Force):
     def factor(self, particle, n):
         assert isinstance(particle, m_part.ActiveParticule)
         assert isinstance(n, m_part.ActiveParticule)
