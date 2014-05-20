@@ -144,6 +144,7 @@ class Force(EstimatedState):
                 uj = n.velocity
                 resultant += self.factor(n, particle) * (uj - ui) * self.__kernel.laplacian(r)
         self.value = resultant
+
         return resultant
 
 
@@ -190,7 +191,6 @@ class Position(IntegratedState):
         assert isinstance(val, m_vec.Vector)
         super().__init__(name, val)
         self.__unit = "m"
-
 
 if __name__ == "__main__":
     kern = m_kern.SpikyKernel(10)
