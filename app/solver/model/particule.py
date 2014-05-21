@@ -27,7 +27,7 @@ from math import *
 import app.solver.model.vector as m_vec
 import app.solver.model.fluid as m_fluid
 import app.solver.model.kernel as m_kern
-import app.solver.model.state as m_state
+"import app.solver.model.state as m_state"
 
 import app.solver.model.hash_table as m_hash
 
@@ -115,7 +115,7 @@ class _Particule(metaclass=_MetaParticule):
         assert isinstance(rad, float)
         self.__radius = rad
 
-    @property
+    """@property
     def states(self):
         return self.__forces
 
@@ -128,7 +128,7 @@ class _Particule(metaclass=_MetaParticule):
         try:
             self.__forces.remove(state)
         except ValueError:
-            pass
+            pass"""
 
     def neighbour(self, h, approx=False):
         return self.__hash_particule.search(self, h, approx=approx)

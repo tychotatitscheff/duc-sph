@@ -125,7 +125,6 @@ class Force(EstimatedState):
         self.__kernel = kern
         self.__kernel_type = kern_type
         self.__unit = "N"
-        self.__type = "general"
 
     def factor(self, particle, n):
         raise NotImplementedError
@@ -196,5 +195,6 @@ class Position(IntegratedState):
 
 if __name__ == "__main__":
     kern = m_kern.SpikyKernel(10)
-    V = ForceViscosity("sals", kern, m_vec.Vector([1, 0, 2]))
+    V = ForcePressure("sals", kern, m_vec.Vector([1, 0, 2]))
+
     print("toto")
