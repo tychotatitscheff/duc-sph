@@ -138,7 +138,7 @@ class ViscosityKernel(Kernel):
     def laplacian(self, r):
         assert isinstance(r, m_vec.Vector)
         h = self.h
-        if r.norm <= h:
+        if r.norm() <= h:
             return 45 / (pi * h ** 6) * (h - r.norm())
         else:
             return 0
@@ -149,9 +149,11 @@ if __name__ == "__main__":
     B = ViscosityKernel(1)
     a = m_vec.Vector([1, 2, 5])
     print(a)
-    print(a.norm)
+    print(a.norm())
 
 
     print(B(m_vec.Vector([1., 2., 3.])))
     print(B.gradient(m_vec.Vector([1., 2., 3.])))
+    print(B.laplacian(m_vec.Vector([1., 2., 3.])))
+    print(A.gradient(m_vec.Vector([1., 2., 3.])))
     print(A.laplacian(m_vec.Vector([1., 2., 3.])))
