@@ -85,6 +85,22 @@ class Poly6Kernel(Kernel):
         else:
             return 0
 
+    def gradient(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return - r * 945 / (32 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) ** 2
+        else:
+            return 0
+
+    def laplacian(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 945 / (8 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) * (r.norm() **2 - 0.75 * (h ** 2 - r.norm() ** 2))
+        else:
+            return 0
+
 
 class SpikyKernel(Kernel):
     """
