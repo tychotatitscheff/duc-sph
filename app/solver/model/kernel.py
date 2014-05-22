@@ -76,6 +76,16 @@ class DefaultKernel(Kernel):
             return 0
 
 
+class Poly6Kernel(Kernel):
+    def __call__(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 315. * ((h ** 2 - r.norm() ** 2) ** 3) / (64 * pi * (h ** 9))
+        else:
+            return 0
+
+
 class SpikyKernel(Kernel):
     """
     Page 20
