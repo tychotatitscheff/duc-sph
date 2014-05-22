@@ -77,6 +77,10 @@ class DefaultKernel(Kernel):
 
 
 class Poly6Kernel(Kernel):
+    """
+    Realtime particle-based fluid simulation, Uni München
+    Page 24
+    """
     def __call__(self, r):
         assert isinstance(r, m_vec.Vector)
         h = self.h
@@ -91,7 +95,7 @@ class Poly6Kernel(Kernel):
         if r.norm() <= h:
             return - r * 945 / (32 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) ** 2
         else:
-            return 0
+            return m_vec.Vector([0, 0, 0])
 
     def laplacian(self, r):
         assert isinstance(r, m_vec.Vector)
