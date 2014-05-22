@@ -78,7 +78,7 @@ class Density(EstimatedState):
         self.value = density
 
 
-class ColorField(EstimatedState):
+class ColourFieldLaplacian(EstimatedState):
     """
     Page 25
 
@@ -94,10 +94,26 @@ class ColorField(EstimatedState):
         return neighbour.mass / neighbour.rho
 
     def __call__(self, particle, neighbour):
-        color = 0
+        colour = 0
         for n in neighbour:
             r = particle.location.value - n.location.value
-            color += self.factor(n) * self.__kernel.__call__(r)
+            colour += self.factor(n) * self.__kernel.laplacian(r)
+
+
+class SurfaceTensionVector(EstimatedState):
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        super().__init__(name, val)
+        self.__kernel = kern
+
+    @staticmethod
+    def factor(neighbour):
+        return neighbour.mass / neighbour.rho
+
+    def __call__(self, particle, neighbour):
+        n = m_vec.Vector([0, 0, 0])
+        for neigh in neighbour:
+            r = particle.location.value - neigh.location.value
+            n += self.factor(neigh) * self.__kernel.gradient(r)
 
 
 class Pressure(EstimatedState):
@@ -166,6 +182,19 @@ class ViscosityForce(Force):
             return particle.fluid.mu * (n.speed - particle.speed) * n.mass / n.rho
 
 
+class SurfaceTension(EstimatedState):
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        super().__init__(name, val)
+        self.__kernel = kern
+
+    def __call__(self, particle, neighbour):
+        k = m_kern.DefaultKernel
+        tension_vector = SurfaceTensionVector("Surface tension", k, m_vec.Vector([0, 0, 0]))
+        force = - particle.fluid.sigma * ColourFieldLaplacian * tension_vector(particle, neighbour) / \
+                tension_vector(particle, neighbour).norm()
+        return force
+
+
 class Speed(IntegratedState):
     def __init__(self, name, val):
         assert isinstance(val, m_vec.Vector)
@@ -183,5 +212,14 @@ class Position(IntegratedState):
         self.__unit = "m"
 
 if __name__ == "__main__":
+    import app.solver.model.fluid as m_fluid
+    import app.solver.model.hash_table as m_hash
     kern = m_kern.SpikyKernel(10)
-
+    pt1 = m_vec.Vector([100, 200, 300])
+    pt2 = m_vec.Vector([102, 201, 300])
+    fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
+    hashing = m_hash.Hash(1, 1000)
+    A = m_part.ActiveParticule(hashing, pt1, 1, fl)
+    B = m_part.ActiveParticule(hashing, pt2, 1, fl)
+    t = SurfaceTension("Tension de surface", kern, m_vec.Vector([0, 0, 0]))
+    print(t(A, A.neighbour(5, True)))
