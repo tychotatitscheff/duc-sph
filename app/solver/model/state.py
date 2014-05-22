@@ -185,7 +185,7 @@ class ForceGravity(Force):
         assert isinstance(particle, m_part.ActiveParticule)
         assert isinstance(n, m_part.ActiveParticule)
 
-        g = particle.GRAVITY
+        g = m_part.GRAVITY
         rho_i = particle.rho
         sens = m_vec.Vector([0, -1, 0])
         return rho_i*g*sens
