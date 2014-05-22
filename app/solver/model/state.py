@@ -20,7 +20,7 @@ __status__ = "Production"
 
 import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
-import app.solver.model.particule as m_part
+#import app.solver.model.particule as m_part
 
 
 class State(object):
@@ -124,7 +124,7 @@ class Pressure(EstimatedState):
         self.__unit = "Pa"
 
     @staticmethod
-    def factor(particle: m_part.ActiveParticule, isotherm):
+    def factor(particle, isotherm):
         if isotherm:
             return (particle.density.value - particle.fluid.rho0) * particle.fluid.k
         else:
@@ -135,6 +135,7 @@ class Pressure(EstimatedState):
 
             pressure = self.factor(particle, isotherm)
             self.value = pressure
+
 
 class Force(EstimatedState):
     def __init__(self, name, kern: m_kern.Kernel, val, kern_type="gradient"):
@@ -166,11 +167,7 @@ class Force(EstimatedState):
 
 
 class ForcePressure(Force):
-    type = "PressureForce"
-
     def factor(self, particle, n):
-        assert isinstance(particle, m_part.ActiveParticule)
-        assert isinstance(n, m_part.ActiveParticule)
         if n is not particle:
             return - particle.density * ((particle.pressure / particle.density ** 2)
                                          + (n.pressure / n.density ** 2)) * n.mass
@@ -182,13 +179,8 @@ class ForcePressure(Force):
         pi = particle.pressure
         return -mj * rho_i * (pi / (rho_i ** 2) + pj / (rho_j ** 2))
 
-class ViscosityForce(Force):
-    """
-    Page 22
-    """
-class ForceViscosity(Force):
-    type = "ViscosityForce"
 
+class ForceViscosity(Force):
     def factor(self, particle, n):
         u_i = particle.velocity
         u_j = n.velocity
@@ -232,16 +224,4 @@ class Position(IntegratedState):
         self.__unit = "m"
 
 if __name__ == "__main__":
-    import app.solver.model.fluid as m_fluid
-    import app.solver.model.hash_table as m_hash
-    kern = m_kern.SpikyKernel(10)
-    V = ForcePressure("sals", kern, m_vec.Vector([1, 0, 2]))
-
-    pt1 = m_vec.Vector([100, 200, 300])
-    pt2 = m_vec.Vector([102, 201, 300])
-    fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
-    hashing = m_hash.Hash(1, 1000)
-    A = m_part.ActiveParticule(hashing, pt1, 1, fl)
-    B = m_part.ActiveParticule(hashing, pt2, 1, fl)
-    t = SurfaceTension("Tension de surface", kern, m_vec.Vector([0, 0, 0]))
-    print(t(A, A.neighbour(5, True)))
+    print("")
