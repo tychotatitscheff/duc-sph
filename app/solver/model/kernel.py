@@ -65,13 +65,23 @@ class DefaultKernel(Kernel):
         if r.norm() <= h:
             return -945/(32 * pi * h ** 9) * r * (h ** 2 - r.norm() ** 2) ** 2
         else:
-            return 0
+            return m_vec.Vector([0, 0, 0])
 
     def laplacian(self, r):
         assert isinstance(r, m_vec.Vector)
         h = self.h
         if r.norm() <= h:
             return -945/(32 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) * (3 * h **2 - 7 * r.norm() ** 2)
+        else:
+            return 0
+
+
+class Poly6Kernel(Kernel):
+    def __call__(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 315. * ((h ** 2 - r.norm() ** 2) ** 3) / (64 * pi * (h ** 9))
         else:
             return 0
 
@@ -100,7 +110,7 @@ class SpikyKernel(Kernel):
         if r.norm() <= h:
             return - 45. * r * ((h - r.norm()) ** 2) / (pi * r.norm() * (h ** 6))
         else:
-            return 0
+            return m_vec.Vector([0, 0, 0])
 
     def laplacian(self, r):
         assert isinstance(r, m_vec.Vector)
@@ -133,7 +143,7 @@ class ViscosityKernel(Kernel):
         if r.norm() <= h:
             return 15 / (2 * pi * h ** 3) * r * (- 3 * r.norm() / (2 * h ** 3) + 2 / (h ** 2) - h / (2 * r.norm() ** 3))
         else:
-            return 0
+            return m_vec.Vector([0, 0, 0])
 
     def laplacian(self, r):
         assert isinstance(r, m_vec.Vector)
@@ -146,7 +156,7 @@ class ViscosityKernel(Kernel):
 
 if __name__ == "__main__":
     A = SpikyKernel(10.)
-    B = ViscosityKernel(1)
+    B = ViscosityKernel(10.)
     a = m_vec.Vector([1, 2, 5])
     print(a)
     print(a.norm())

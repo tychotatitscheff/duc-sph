@@ -20,11 +20,7 @@ __status__ = "Production"
 
 import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
-try:
-    import app.solver.model.particule as m_part
-except AttributeError:
-    pass
-import app.solver.model.solver as m_solver
+import app.solver.model.particule as m_part
 
 
 class State(object):
@@ -83,7 +79,7 @@ class Density(EstimatedState):
         self.value = density
 
 
-class ColorField(EstimatedState):
+class ColourFieldLaplacian(EstimatedState):
     """
     Page 25
 
@@ -99,10 +95,26 @@ class ColorField(EstimatedState):
         return neighbour.mass / neighbour.rho
 
     def __call__(self, particle, neighbour):
-        color = 0
+        colour = 0
         for n in neighbour:
             r = particle.location.value - n.location.value
-            color += self.factor(n) * self.__kernel.__call__(r)
+            colour += self.factor(n) * self.__kernel.laplacian(r)
+
+
+class SurfaceTensionVector(EstimatedState):
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        super().__init__(name, val)
+        self.__kernel = kern
+
+    @staticmethod
+    def factor(neighbour):
+        return neighbour.mass / neighbour.rho
+
+    def __call__(self, particle, neighbour):
+        n = m_vec.Vector([0, 0, 0])
+        for neigh in neighbour:
+            r = particle.location.value - neigh.location.value
+            n += self.factor(neigh) * self.__kernel.gradient(r)
 
 
 class Pressure(EstimatedState):
@@ -113,12 +125,17 @@ class Pressure(EstimatedState):
         self.__unit = "Pa"
 
     @staticmethod
-    def factor(particle: m_part.ActiveParticule):
-        return particle.density.value * particle.fluid.k
+    def factor(particle, isotherm):
+        if isotherm:
+            return (particle.density.value - particle.fluid.rho0) * particle.fluid.k
+        else:
+            # P = nRT / V
+            pass
 
-    def __call__(self, particle):
-        pressure = self.factor(particle)
-        self.value = pressure
+    def __call__(self, particle, isotherm=True):
+
+            pressure = self.factor(particle, isotherm)
+            self.value = pressure
 
 
 class Force(EstimatedState):
@@ -141,9 +158,8 @@ class Force(EstimatedState):
             w = self.__kernel.gradient
         elif k_type == "laplacian":
             w = self.__kernel.laplacian
-
         else:
-            w = self.__kernel.__call__
+            w = self.__call__
         for n in neighbour:
             r = particle.loc.value - neighbour.loc.value
             resultant += self.factor(particle, n) * w(r)
@@ -152,10 +168,12 @@ class Force(EstimatedState):
 
 
 class ForcePressure(Force):
+    type = "PressureForce"
 
     def factor(self, particle, n):
-        assert isinstance(particle, m_part.ActiveParticule)
-        assert isinstance(n, m_part.ActiveParticule)
+        if n is not particle:
+            return - particle.density * ((particle.pressure / particle.density ** 2)
+                                         + (n.pressure / n.density ** 2)) * n.mass
 
         mj = n.mass
         rho_j = n.density
@@ -166,11 +184,7 @@ class ForcePressure(Force):
 
 
 class ForceViscosity(Force):
-
     def factor(self, particle, n):
-        assert isinstance(particle, m_part.ActiveParticule)
-        assert isinstance(n, m_part.ActiveParticule)
-
         u_i = particle.velocity
         u_j = n.velocity
         m_j = n.mass
@@ -179,7 +193,22 @@ class ForceViscosity(Force):
         return (u_j - u_i) * mu * m_j / rho_i
 
 
+class SurfaceTension(EstimatedState):
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        super().__init__(name, val)
+        self.__kernel = kern
+
+    def __call__(self, particle, neighbour):
+        k = m_kern.DefaultKernel
+        tension_vector = SurfaceTensionVector("Surface tension", k, m_vec.Vector([0, 0, 0]))
+        force = - particle.fluid.sigma * ColourFieldLaplacian * tension_vector(particle, neighbour) / \
+                tension_vector(particle, neighbour).norm()
+        return force
+
+
 class ForceGravity(Force):
+    type = "Gravity"
+    
 
     def __call__(self, particle, n):
         assert isinstance(particle, m_part.ActiveParticule)
@@ -197,6 +226,7 @@ class Speed(IntegratedState):
         assert isinstance(particle, m_part)
         super().__init__(name, val)
         self.__unit = "m/s"
+        
 
     def __call__(self,  particle):
         """
@@ -233,7 +263,4 @@ class Position(IntegratedState):
 
 
 if __name__ == "__main__":
-    kern = m_kern.SpikyKernel(10)
-    V = ForcePressure("sals", kern, m_vec.Vector([1, 0, 2]))
-
-    print("toto")
+    print("")
