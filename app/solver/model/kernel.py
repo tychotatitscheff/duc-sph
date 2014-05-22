@@ -76,6 +76,16 @@ class DefaultKernel(Kernel):
             return 0
 
 
+class Poly6Kernel(Kernel):
+    def __call__(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 315. * ((h ** 2 - r.norm() ** 2) ** 3) / (64 * pi * (h ** 9))
+        else:
+            return 0
+
+
 class SpikyKernel(Kernel):
     """
     Page 20
@@ -122,25 +132,23 @@ class ViscosityKernel(Kernel):
     def __call__(self, r):
         assert isinstance(r, m_vec.Vector)
         h = self.h
-        if r.norm <= h:
-            return 15 / (2 * pi * h ** 3) * (- r.norm ** 3 / (2 * h ** 3) +
-            r.norm() ** 2 / (h ** 2) + h / (2 * r.norm()) - 1)
+        if r.norm() <= h:
+            return 15 / (2 * pi * h ** 3) * (- r.norm() ** 3 / (2 * h ** 3) + r.norm() ** 2 / (h ** 2) + h / (2 * r.norm()) - 1)
         else:
             return 0
 
     def gradient(self, r):
         assert isinstance(r, m_vec.Vector)
         h = self.h
-        if r.norm <= h:
-            return 15 / (2 * pi * h ** 3) * r * (- 3 * r.norm() / (2 * h ** 3) +
-            2 / (h ** 2) - h / (2 * r.norm() ** 3))
+        if r.norm() <= h:
+            return 15 / (2 * pi * h ** 3) * r * (- 3 * r.norm() / (2 * h ** 3) + 2 / (h ** 2) - h / (2 * r.norm() ** 3))
         else:
             return 0
 
     def laplacian(self, r):
         assert isinstance(r, m_vec.Vector)
         h = self.h
-        if r.norm <= h:
+        if r.norm() <= h:
             return 45 / (pi * h ** 6) * (h - r.norm())
         else:
             return 0
@@ -148,6 +156,14 @@ class ViscosityKernel(Kernel):
 
 if __name__ == "__main__":
     A = SpikyKernel(10.)
-    print(A(m_vec.Vector([1., 2., 3.])))
+    B = ViscosityKernel(1)
+    a = m_vec.Vector([1, 2, 5])
+    print(a)
+    print(a.norm())
+
+
+    print(B(m_vec.Vector([1., 2., 3.])))
+    print(B.gradient(m_vec.Vector([1., 2., 3.])))
+    print(B.laplacian(m_vec.Vector([1., 2., 3.])))
     print(A.gradient(m_vec.Vector([1., 2., 3.])))
     print(A.laplacian(m_vec.Vector([1., 2., 3.])))

@@ -27,11 +27,12 @@ from math import *
 import app.solver.model.vector as m_vec
 import app.solver.model.fluid as m_fluid
 import app.solver.model.kernel as m_kern
-import app.solver.model.state as m_state
+"import app.solver.model.state as m_state"
 
 import app.solver.model.hash_table as m_hash
 
 import pytest
+
 
 dict_type_particule = {}
 
@@ -39,6 +40,7 @@ def_fluid = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
 
 ATMOSPHERIC_PRESSURE = 1
 GRAVITY = 9.8
+
 
 class _MetaParticule(ABCMeta):
     """
@@ -56,14 +58,14 @@ class _Particule(metaclass=_MetaParticule):
     Generic abstract particule class.
     """
     @abstractmethod
-    def __init__(self, hash_particule, location: m_vec, radius: float=1.):
+    def __init__(self, hash_particule, location: m_vec, radius: float=1., rad_mul=RAD_MUL):
         """
         :type location: point.Point
         :type radius: float
         """
-        self.__density = m_state.Density("rho of " + str(self.__hash__()), m_kern.DefaultKernel(RAD_MUL * radius), 1)
-        self.__location = m_state.Position("Location of " + str(self.__hash__()), location)
-        self.__future_location = m_state.Position("Old location of " + str(self.__hash__()), location)
+        self.__density = m_state.Density("rho of " + str(self.__hash__()), m_kern.DefaultKernel(rad_mul * radius), 1)
+        self.__location = m_state.Position("Current location of " + str(self.__hash__()), location)
+        self.__future_location = m_state.Position("Next location of " + str(self.__hash__()), location)
         self.__radius = radius
         self.__speed = m_state.Speed("Speed of" + str(self.__hash__()), m_vec.Vector([0, 0, 0]))
 
@@ -115,7 +117,7 @@ class _Particule(metaclass=_MetaParticule):
         assert isinstance(rad, float)
         self.__radius = rad
 
-    @property
+    """@property
     def states(self):
         return self.__forces
 
@@ -128,7 +130,7 @@ class _Particule(metaclass=_MetaParticule):
         try:
             self.__forces.remove(state)
         except ValueError:
-            pass
+            pass"""
 
     def neighbour(self, h, approx=False):
         return self.__hash_particule.search(self, h, approx=approx)
@@ -142,7 +144,7 @@ class ActiveParticule(_Particule):
         super().__init__(hash_particule, location, radius)
         self.__fluid = fluid
         self.__density = m_state.Density("rho of " + str(self.__hash__()),
-                                         m_kern.DefaultKernel(RAD_MUL * radius), fluid.rho0)
+                                         m_kern.Poly6Kernel(RAD_MUL * radius), fluid.rho0)
         self.__pressure = m_state.Pressure("P of " + str(self.__hash__()), ATMOSPHERIC_PRESSURE)
         self.__mass = 0
         self.__velocity = 0

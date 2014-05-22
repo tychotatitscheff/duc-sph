@@ -124,42 +124,50 @@ class Pressure(EstimatedState):
         self.__unit = "Pa"
 
     @staticmethod
-    def factor(particle: m_part.ActiveParticule):
-        return particle.density.value * particle.fluid.k
+    def factor(particle: m_part.ActiveParticule, isotherm):
+        if isotherm:
+            return (particle.density.value - particle.fluid.rho0) * particle.fluid.k
+        else:
+            # P = nRT / V
+            pass
 
-    def __call__(self, particle):
-        pressure = self.factor(particle)
-        self.value = pressure
+    def __call__(self, particle, isotherm=True):
 
+            pressure = self.factor(particle, isotherm)
+            self.value = pressure
 
 class Force(EstimatedState):
-    def __init__(self, name, kern: m_kern.Kernel, val):
+    def __init__(self, name, kern: m_kern.Kernel, val, kern_type="gradient"):
         assert isinstance(val, m_vec.Vector)
         #assert isinstance(kernel, m_kern.Kernel)
         super().__init__(name, val)
         self.__kernel = kern
+        self.__kernel_type = kern_type
         self.__unit = "N"
 
     def factor(self, particle, n):
-        pass
+        raise NotImplementedError
 
     def __call__(self, particle, neighbour):
         #assert isinstance(neighbour, list)
         resultant = m_vec.Vector([0, 0, 0])
+        k_type = self.__kernel_type
+        if k_type == "gradient":
+            w = self.__kernel.gradient
+        elif k_type == "laplacian":
+            w = self.__kernel.laplacian
+        else:
+            w = self.__call__
         for n in neighbour:
             r = particle.loc.value - neighbour.loc.value
-            resultant += self.factor(particle, n) * self.__kernel.gradient(r)
-        self.value = resultant
+            resultant += self.factor(particle, n) * w(r)
+
         return resultant
 
 
-class PressureForce(Force):
-    """
-    Page 17
+class ForcePressure(Force):
+    type = "PressureForce"
 
-    M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
-    Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
-    """
     def factor(self, particle, n):
         assert isinstance(particle, m_part.ActiveParticule)
         assert isinstance(n, m_part.ActiveParticule)
@@ -167,19 +175,27 @@ class PressureForce(Force):
             return - particle.density * ((particle.pressure / particle.density ** 2)
                                          + (n.pressure / n.density ** 2)) * n.mass
 
+        mj = n.mass
+        rho_j = n.density
+        rho_i = particle.density
+        pj = n.pressure
+        pi = particle.pressure
+        return -mj * rho_i * (pi / (rho_i ** 2) + pj / (rho_j ** 2))
 
 class ViscosityForce(Force):
     """
     Page 22
-
-    M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
-    Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
+class ForceViscosity(Force):
+    type = "ViscosityForce"
+
     def factor(self, particle, n):
-        assert isinstance(particle, m_part.ActiveParticule)
-        assert isinstance(n, m_part.ActiveParticule)
-        if n is not particle:
-            return particle.fluid.mu * (n.speed - particle.speed) * n.mass / n.rho
+        u_i = particle.velocity
+        u_j = n.velocity
+        m_j = n.mass
+        rho_i = particle.density
+        mu = particle.fluid.mu
+        return (u_j - u_i) * mu * m_j / rho_i
 
 
 class SurfaceTension(EstimatedState):
@@ -195,6 +211,10 @@ class SurfaceTension(EstimatedState):
         return force
 
 
+class ForceGravity(Force):
+    type = "Gravity"
+    
+
 class Speed(IntegratedState):
     def __init__(self, name, val):
         assert isinstance(val, m_vec.Vector)
@@ -203,7 +223,7 @@ class Speed(IntegratedState):
 
 
 class Position(IntegratedState):
-    def __init__(self, name,  val):
+    def __init__(self, name, val):
         """
 
         """
@@ -215,6 +235,8 @@ if __name__ == "__main__":
     import app.solver.model.fluid as m_fluid
     import app.solver.model.hash_table as m_hash
     kern = m_kern.SpikyKernel(10)
+    V = ForcePressure("sals", kern, m_vec.Vector([1, 0, 2]))
+
     pt1 = m_vec.Vector([100, 200, 300])
     pt2 = m_vec.Vector([102, 201, 300])
     fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
