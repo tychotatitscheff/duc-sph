@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from IPython.core.pylabtools import select_figure_format
 
 __author__ = "Clément Eberhardt," \
              "Clément Léost," \
@@ -102,6 +101,7 @@ class SphSolver(Solver):
     def run(self):
         # Initialize the system if not
         if not self.__initialized:
+            # TODO l, n
             l = None
             n = None
             self.__initialisation(l, n)
@@ -134,6 +134,7 @@ class SphSolver(Solver):
                     item.pressure.__call__(item)
                 except Exception as e:
                     print(e)
+
         executor = concurrent.futures.ProcessPoolExecutor(NUM_WORKER)
         futures = [executor.submit(try_compute_density, group)
                    for group in h_group.grouper(self.__particules.hash_table.values(), GROUP_BY_LOW)]

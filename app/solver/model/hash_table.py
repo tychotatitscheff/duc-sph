@@ -32,8 +32,8 @@ class Hash():
         l : cell size
         n : number of particle
         """
-        self.__l = l
-        self.__n = n
+        self.__l = l  # size of cell
+        self.__n = n  # number of particles
         self.__n_h = next(m_pr.primes_above(2 * n))
 
         self.__p1 = p1

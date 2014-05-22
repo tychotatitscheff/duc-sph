@@ -27,7 +27,7 @@ from math import *
 import app.solver.model.vector as m_vec
 import app.solver.model.fluid as m_fluid
 import app.solver.model.kernel as m_kern
-import app.solver.model.state as m_state
+"import app.solver.model.state as m_state"
 
 import app.solver.model.hash_table as m_hash
 
@@ -67,6 +67,7 @@ class _Particule(metaclass=_MetaParticule):
         self.__location = m_state.Position("Current location of " + str(self.__hash__()), location)
         self.__future_location = m_state.Position("Next location of " + str(self.__hash__()), location)
         self.__radius = radius
+        self.__speed = m_state.Speed("Speed of" + str(self.__hash__()), m_vec.Vector([0, 0, 0]))
 
         self.__forces = []
         self.__force_res = m_vec.Vector([0, 0, 0])
@@ -92,6 +93,14 @@ class _Particule(metaclass=_MetaParticule):
         self.__location = loc
 
     @property
+    def speed(self):
+        return self.__speed
+
+    @speed.setter
+    def speed(self, sp):
+        self.__speed = sp
+
+    @property
     def future_location(self):
         return self.__future_location
 
@@ -108,7 +117,7 @@ class _Particule(metaclass=_MetaParticule):
         assert isinstance(rad, float)
         self.__radius = rad
 
-    @property
+    """@property
     def states(self):
         return self.__forces
 
@@ -121,7 +130,7 @@ class _Particule(metaclass=_MetaParticule):
         try:
             self.__forces.remove(state)
         except ValueError:
-            pass
+            pass"""
 
     def neighbour(self, h, approx=False):
         return self.__hash_particule.search(self, h, approx=approx)
@@ -137,6 +146,8 @@ class ActiveParticule(_Particule):
         self.__density = m_state.Density("rho of " + str(self.__hash__()),
                                          m_kern.Poly6Kernel(RAD_MUL * radius), fluid.rho0)
         self.__pressure = m_state.Pressure("P of " + str(self.__hash__()), ATMOSPHERIC_PRESSURE)
+        self.__mass = 0
+        self.__velocity = 0
 
     def __del__(self):
         super().__del__()
@@ -161,6 +172,10 @@ class ActiveParticule(_Particule):
     def mass(self):
         return 4/3 * pi * (self.radius ** 3) * self.fluid.rho0
 
+    @mass.setter
+    def mass(self, masse):
+        self.__mass = masse
+
     @property
     def rho(self):
         return self.__density.value
@@ -168,6 +183,10 @@ class ActiveParticule(_Particule):
     @property
     def rho0(self):
         return self.fluid.rho
+
+    @property
+    def velocity(self):
+        return self.__velocity
 
 
 class GhostParticule(_Particule):

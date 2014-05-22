@@ -51,16 +51,27 @@ class DefaultKernel(Kernel):
     M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
-    # TODO : Implementer le kernel par default
-    pass
-
-
-class Poly6Kernel(Kernel):
     def __call__(self, r):
         assert isinstance(r, m_vec.Vector)
         h = self.h
         if r.norm() <= h:
-            return 315. * ((h ** 2 - r.norm() ** 2) ** 3) / (64 * pi * (h ** 9))
+            return 315/(64 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) ** 3
+        else:
+            return 0
+
+    def gradient(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return -945/(32 * pi * h ** 9) * r * (h ** 2 - r.norm() ** 2) ** 2
+        else:
+            return 0
+
+    def laplacian(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return -945/(32 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) * (3 * h **2 - 7 * r.norm() ** 2)
         else:
             return 0
 
@@ -107,15 +118,42 @@ class ViscosityKernel(Kernel):
     M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
-    # TODO : implementer le kernel viscosity
-    pass
+
+    def __call__(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 15 / (2 * pi * h ** 3) * (- r.norm() ** 3 / (2 * h ** 3) + r.norm() ** 2 / (h ** 2) + h / (2 * r.norm()) - 1)
+        else:
+            return 0
+
+    def gradient(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 15 / (2 * pi * h ** 3) * r * (- 3 * r.norm() / (2 * h ** 3) + 2 / (h ** 2) - h / (2 * r.norm() ** 3))
+        else:
+            return 0
+
+    def laplacian(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 45 / (pi * h ** 6) * (h - r.norm())
+        else:
+            return 0
 
 
 if __name__ == "__main__":
     A = SpikyKernel(10.)
-    print(A(m_vec.Vector([1., 2., 3.])))
+    B = ViscosityKernel(1)
+    a = m_vec.Vector([1, 2, 5])
+    print(a)
+    print(a.norm())
+
+
+    print(B(m_vec.Vector([1., 2., 3.])))
+    print(B.gradient(m_vec.Vector([1., 2., 3.])))
+    print(B.laplacian(m_vec.Vector([1., 2., 3.])))
     print(A.gradient(m_vec.Vector([1., 2., 3.])))
     print(A.laplacian(m_vec.Vector([1., 2., 3.])))
-    B = Poly6Kernel(10.)
-    print(A(m_vec.Vector([0., 0., 0.])))
-    print(B(m_vec.Vector([0., 0., 0.])))

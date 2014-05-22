@@ -28,7 +28,7 @@ class Fluid(object):
     def __init__(self, rho0, b, mu, sigma, l, k, cr):
         self.__rho0 = rho0  # Rest density
         self.__b = b  # Buoyancy diffusion
-        self._mu = mu  # Viscosity
+        self.__mu = mu  # Viscosity
         self.__sigma = sigma  # Surface tension
         self.__l = l  # Threshold for normal computation in surface tension computation
         self.__k = k  # Gas stiffness
@@ -42,3 +42,7 @@ class Fluid(object):
     @property
     def k(self):
         return self.__k
+
+    @property
+    def mu(self):
+        return self.__mu
