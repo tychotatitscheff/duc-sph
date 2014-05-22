@@ -52,7 +52,17 @@ class DefaultKernel(Kernel):
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
     # TODO : Implementer le kernel par default
-    raise NotImplementedError
+    pass
+
+
+class Poly6Kernel(Kernel):
+    def __call__(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 315. * ((h ** 2 - r.norm() ** 2) ** 3) / (64 * pi * (h ** 9))
+        else:
+            return 0
 
 
 class SpikyKernel(Kernel):
@@ -98,7 +108,7 @@ class ViscosityKernel(Kernel):
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
     # TODO : implementer le kernel viscosity
-    raise NotImplementedError
+    pass
 
 
 if __name__ == "__main__":
@@ -106,3 +116,6 @@ if __name__ == "__main__":
     print(A(m_vec.Vector([1., 2., 3.])))
     print(A.gradient(m_vec.Vector([1., 2., 3.])))
     print(A.laplacian(m_vec.Vector([1., 2., 3.])))
+    B = Poly6Kernel(10.)
+    print(A(m_vec.Vector([0., 0., 0.])))
+    print(B(m_vec.Vector([0., 0., 0.])))

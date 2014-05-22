@@ -22,6 +22,7 @@ import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
 import app.solver.model.particule as m_part
 
+
 class State(object):
     """
     This class defines a state (force, temp).
@@ -83,12 +84,17 @@ class Pressure(EstimatedState):
         self.__unit = "Pa"
 
     @staticmethod
-    def factor(particle: m_part.ActiveParticule):
-        return particle.density.value * particle.fluid.k
+    def factor(particle: m_part.ActiveParticule, isotherm):
+        if isotherm:
+            return (particle.density.value - particle.fluid.rho0) * particle.fluid.k
+        else:
+            # P = nRT / V
+            pass
 
-    def __call__(self, particle):
-        pressure = self.factor(particle)
-        self.value = pressure
+    def __call__(self, particle, isotherm=True):
+
+            pressure = self.factor(particle, isotherm)
+            self.value = pressure
 
 
 class Force(EstimatedState):
