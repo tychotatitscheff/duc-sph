@@ -57,7 +57,7 @@ class DefaultKernel(Kernel):
         if r.norm() <= h:
             return 315/(64 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) ** 3
         else:
-            return 0
+            return 0.
 
     def gradient(self, r):
         assert isinstance(r, m_vec.Vector)
@@ -73,7 +73,7 @@ class DefaultKernel(Kernel):
         if r.norm() <= h:
             return -945/(32 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) * (3 * h **2 - 7 * r.norm() ** 2)
         else:
-            return 0
+            return 0.
 
 
 class Poly6Kernel(Kernel):
@@ -87,7 +87,7 @@ class Poly6Kernel(Kernel):
         if r.norm() <= h:
             return 315. * ((h ** 2 - r.norm() ** 2) ** 3) / (64 * pi * (h ** 9))
         else:
-            return 0
+            return 0.
 
     def gradient(self, r):
         assert isinstance(r, m_vec.Vector)
@@ -103,7 +103,7 @@ class Poly6Kernel(Kernel):
         if r.norm() <= h:
             return 945 / (8 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) * (r.norm() **2 - 0.75 * (h ** 2 - r.norm() ** 2))
         else:
-            return 0
+            return 0.
 
 
 class SpikyKernel(Kernel):
@@ -122,7 +122,7 @@ class SpikyKernel(Kernel):
         if r.norm() <= h:
             return 15. * ((h - r.norm()) ** 3) / (pi * (h ** 6))
         else:
-            return 0
+            return 0.
 
     def gradient(self, r):
         assert isinstance(r, m_vec.Vector)
@@ -138,7 +138,7 @@ class SpikyKernel(Kernel):
         if r.norm() <= h:
             return - 90. * ((h - r.norm())) * ((h - 2 * r.norm())) / (pi * r.norm() * (h ** 6))
         else:
-            return 0
+            return 0.
 
 
 class ViscosityKernel(Kernel):
@@ -155,7 +155,7 @@ class ViscosityKernel(Kernel):
         if r.norm() <= h:
             return 15 / (2 * pi * h ** 3) * (- r.norm() ** 3 / (2 * h ** 3) + r.norm() ** 2 / (h ** 2) + h / (2 * r.norm()) - 1)
         else:
-            return 0
+            return 0.
 
     def gradient(self, r):
         assert isinstance(r, m_vec.Vector)
@@ -171,7 +171,7 @@ class ViscosityKernel(Kernel):
         if r.norm() <= h:
             return 45 / (pi * h ** 6) * (h - r.norm())
         else:
-            return 0
+            return 0.
 
 
 if __name__ == "__main__":
@@ -180,7 +180,6 @@ if __name__ == "__main__":
     a = m_vec.Vector([1, 2, 5])
     print(a)
     print(a.norm())
-
 
     print(B(m_vec.Vector([1., 2., 3.])))
     print(B.gradient(m_vec.Vector([1., 2., 3.])))
