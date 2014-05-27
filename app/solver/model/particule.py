@@ -27,7 +27,9 @@ from math import *
 import app.solver.model.vector as m_vec
 import app.solver.model.fluid as m_fluid
 import app.solver.model.kernel as m_kern
-"import app.solver.model.state as m_state"
+
+
+import app.solver.model.state as m_state
 
 import app.solver.model.hash_table as m_hash
 
@@ -68,7 +70,7 @@ class _Particule(metaclass=_MetaParticule):
         self.__future_location = m_state.Position("Next location of " + str(self.__hash__()), location)
         self.__radius = radius
         self.__speed = m_state.Speed("Speed of" + str(self.__hash__()), m_vec.Vector([0, 0, 0]))
-
+        self.__acceleration = 0
         self.__forces = []
         self.__force_res = m_vec.Vector([0, 0, 0])
         self.__hash_particule = hash_particule
@@ -101,6 +103,14 @@ class _Particule(metaclass=_MetaParticule):
         self.__speed = sp
 
     @property
+    def acceleration(self):
+        return self.__acceleration
+
+    @acceleration.setter
+    def acceleration(self, acc):
+        self.__acceleration = acc
+
+    @property
     def future_location(self):
         return self.__future_location
 
@@ -117,20 +127,20 @@ class _Particule(metaclass=_MetaParticule):
         assert isinstance(rad, float)
         self.__radius = rad
 
-    """@property
+    @property
     def states(self):
         return self.__forces
 
-    def append_force(self, state: m_state.State):
-        assert isinstance(state, m_state.State)
+    def append_force(self, state):
+        #assert isinstance(state, m_state.State)
         self.__forces.append(state)
 
-    def delete_state(self, state: m_state.State):
-        assert isinstance(state, m_state.State)
+    def delete_state(self, state):
+        #assert isinstance(state, m_state.State)
         try:
             self.__forces.remove(state)
         except ValueError:
-            pass"""
+            pass
 
     def neighbour(self, h, approx=False):
         return self.__hash_particule.search(self, h, approx=approx)

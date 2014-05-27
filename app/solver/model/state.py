@@ -20,7 +20,11 @@ __status__ = "Production"
 
 import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
-import app.solver.model.particule as m_part
+try:
+    import app.solver.model.particule as m_part
+except AttributeError:
+    pass
+import app.solver.model.solver as m_solver
 
 
 class State(object):
@@ -109,17 +113,12 @@ class Pressure(EstimatedState):
         self.__unit = "Pa"
 
     @staticmethod
-    def factor(particle: m_part.ActiveParticule, isotherm):
-        if isotherm:
-            return (particle.density.value - particle.fluid.rho0) * particle.fluid.k
-        else:
-            # P = nRT / V
-            pass
+    def factor(particle: m_part.ActiveParticule):
+        return particle.density.value * particle.fluid.k
 
-    def __call__(self, particle, isotherm=True):
-
-            pressure = self.factor(particle, isotherm)
-            self.value = pressure
+    def __call__(self, particle):
+        pressure = self.factor(particle)
+        self.value = pressure
 
 
 class Force(EstimatedState):
@@ -142,8 +141,9 @@ class Force(EstimatedState):
             w = self.__kernel.gradient
         elif k_type == "laplacian":
             w = self.__kernel.laplacian
+
         else:
-            w = self.__call__
+            w = self.__kernel.__call__
         for n in neighbour:
             r = particle.loc.value - neighbour.loc.value
             resultant += self.factor(particle, n) * w(r)
@@ -152,7 +152,6 @@ class Force(EstimatedState):
 
 
 class ForcePressure(Force):
-    type = "PressureForce"
 
     def factor(self, particle, n):
         assert isinstance(particle, m_part.ActiveParticule)
@@ -167,9 +166,11 @@ class ForcePressure(Force):
 
 
 class ForceViscosity(Force):
-    type = "ViscosityForce"
 
     def factor(self, particle, n):
+        assert isinstance(particle, m_part.ActiveParticule)
+        assert isinstance(n, m_part.ActiveParticule)
+
         u_i = particle.velocity
         u_j = n.velocity
         m_j = n.mass
@@ -179,24 +180,57 @@ class ForceViscosity(Force):
 
 
 class ForceGravity(Force):
-    type = "Gravity"
-    
+
+    def __call__(self, particle, n):
+        assert isinstance(particle, m_part.ActiveParticule)
+        assert isinstance(n, m_part.ActiveParticule)
+
+        g = m_part.GRAVITY
+        rho_i = particle.rho
+        sens = m_vec.Vector([0, -1, 0])
+        return rho_i*g*sens
+
 
 class Speed(IntegratedState):
-    def __init__(self, name, val):
+    def __init__(self, name, val, particle):
         assert isinstance(val, m_vec.Vector)
+        assert isinstance(particle, m_part)
         super().__init__(name, val)
         self.__unit = "m/s"
-        
+
+    def __call__(self,  particle):
+        """
+        Integration d'euler
+        """
+        assert isinstance(particle, m_part.ActiveParticule)
+
+        a = particle.acceleration()
+        dt = m_solver.Solver.dt
+        speed = particle.speed
+
+        speed += a*dt
+        return speed
+
 
 class Position(IntegratedState):
     def __init__(self, name, val):
-        """
-
-        """
         assert isinstance(val, m_vec.Vector)
         super().__init__(name, val)
         self.__unit = "m"
+
+    def __call__(self, particle):
+        """
+        integration euler
+        """
+        assert isinstance(particle, m_part.ActiveParticule)
+
+        speed = particle.speed
+        dt = m_solver.Solver.dt
+        loc = particle.location
+
+        loc += speed*dt
+        return loc
+
 
 if __name__ == "__main__":
     kern = m_kern.SpikyKernel(10)

@@ -42,8 +42,8 @@ class BaseSolver():
         self.__tt = tt
         self.__t = 0
         self.__dt = dt
-        self.__particules = None
-        self.__collision_object = None
+        self.__particule = None
+        self.__collisions_object = None
         self.__initialized = False
 
     @property
@@ -83,6 +83,11 @@ class Solver(BaseSolver):
         self.__initialized = solver.__initialized
         self.__integration_step = solver.integration_step
         self.__dt = solver.dt
+
+    @property
+    def dt(self, _dt):
+        return self.__dt
+
 
 
 class SphSolver(Solver):
