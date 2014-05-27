@@ -18,11 +18,12 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
+import concurrent.futures
+
 import app.solver.helper.grouper as h_group
-import app.solver.model.particule as m_part
+import app.solver.model.particle as m_part
 import app.solver.model.hash_table as m_hash
 
-import concurrent.futures
 
 RADIUS_MULTIPLICATIVE = 3
 NUM_WORKER = 25

@@ -28,8 +28,10 @@ Requires: Python 2.5 and numpy 1.0.4
 (c) Ilan Schnell, 2008
 '''
 
-import numpy
 import math
+
+import numpy
+
 
 _TINY = 1e-15
 
