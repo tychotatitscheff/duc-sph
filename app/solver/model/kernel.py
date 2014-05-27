@@ -161,7 +161,6 @@ if __name__ == "__main__":
     print(a)
     print(a.norm())
 
-
     print(B(m_vec.Vector([1., 2., 3.])))
     print(B.gradient(m_vec.Vector([1., 2., 3.])))
     print(B.laplacian(m_vec.Vector([1., 2., 3.])))
