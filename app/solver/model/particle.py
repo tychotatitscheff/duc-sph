@@ -18,13 +18,14 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
-RAD_MUL = 2
+
 
 from math import *
 
 import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
 
+RAD_MUL = 2
 ATMOSPHERIC_PRESSURE = 1
 GRAVITY = m_vec.Vector([0, 0, -9.8])
 
@@ -35,7 +36,8 @@ class ActiveParticle(object):
     """
     Particle class.
     """
-    def __init__(self, hash_particle, location: m_vec, fluid, radius, speed=m_vec.Vector([0, 0, 0]), rad_mul=RAD_MUL):
+    def __init__(self, hash_particle, location: m_vec, fluid, radius, speed=m_vec.Vector([0, 0, 0]),
+                 acceleration=m_vec.Vector([0, 0, 0]), rad_mul=RAD_MUL):
         """
         :type location: point.Point
         :type radius: float
@@ -61,14 +63,15 @@ class ActiveParticle(object):
         self.__resultant_force = m_vec.Vector([0, 0, 0])
 
         # Integrated properties
+        self.__old_location = Position("Old location of " + str(self.__hash__()), location)
         self.__current_location = Position("Current location of " + str(self.__hash__()), location)
         self.__future_location = Position("Future location of " + str(self.__hash__()), location)
 
         self.__current_speed = Speed("Current speed of" + str(self.__hash__()), speed)
-        self.__future_speed = Speed("Future location of" + str(self.__hash__()), speed)
+        self.__future_speed = Speed("Future speed of" + str(self.__hash__()), speed)
 
-        self.__current_acceleration = 0
-        self.__future_acceleration = 0
+        self.__current_acceleration = Acceleration("Current acceleration of" + str(self.__hash__()), acceleration)
+        self.__future_acceleration = Acceleration("Future acceleration of" + str(self.__hash__()), acceleration)
 
         # Append particle to acceleration structure
         self.__hash_particle.insert(self)
@@ -136,6 +139,14 @@ class ActiveParticle(object):
         return self.__pressure
 
     ### Location
+
+    @property
+    def old_location(self):
+        return self.__old_location
+
+    @old_location.setter
+    def old_location(self, loc):
+        self.__old_location = loc
 
     @property
     def current_location(self):

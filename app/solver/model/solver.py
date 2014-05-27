@@ -147,9 +147,9 @@ class SphSolver(Solver):
                         assert isinstance(force, m_part.Force)
                         force.__call__(particle, neigh)
                         particle.resultant_force += force.value
-                    particle.future_acceleration = particle.resultant_force / particle.mass
-                    particle.future_speed = particle.current_speed + particle.future_acceleration * self.dt
-                    particle.future_location = particle.current_location + particle.future_speed * self.dt
+                    particle.future_acceleration.value = particle.resultant_force * 1. / particle.mass
+                    particle.future_speed = particle.current_speed.value + particle.future_acceleration.value * self.dt
+                    particle.future_location = particle.current_location.value + particle.future_speed.value * self.dt
                 except Exception as e:
                     print(e)
 
@@ -159,7 +159,19 @@ class SphSolver(Solver):
         concurrent.futures.wait(futures)
 
     def __update(self):
-        pass
+        def try_compute_forces_and_integrate(items):
+            for particle in items:
+                try:
+                    assert isinstance(particle, m_part.ActiveParticle)
+                    particle.resultant_force = m_vec.Vector([0, 0, 0])
+                    particle.current_speed.value = particle.future_speed.value
+                    particle.current_location.value = particle.current_location.value
+                except Exception as e:
+                    print(e)
+        executor = concurrent.futures.ProcessPoolExecutor(NUM_WORKER)
+        futures = [executor.submit(try_compute_forces_and_integrate, group)
+                   for group in h_group.grouper(self.__particles.hash_table.values(), GROUP_BY_LOW)]
+        concurrent.futures.wait(futures)
 
 
 if __name__ == "__main__":
