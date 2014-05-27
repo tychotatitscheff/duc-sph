@@ -20,4 +20,3 @@ __status__ = "Production"
 
 import pytest
 import app.solver.model.kernel
-
