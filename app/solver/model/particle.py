@@ -182,11 +182,11 @@ class ActiveParticle(object):
         self.__current_acceleration = acc
 
     @property
-    def current_acceleration(self):
+    def future_acceleration(self):
         return self.__future_acceleration
 
-    @current_acceleration.setter
-    def current_acceleration(self, acc):
+    @future_acceleration.setter
+    def future_acceleration(self, acc):
         self.__future_acceleration = acc
 
     ### Forces
@@ -198,6 +198,15 @@ class ActiveParticle(object):
     @property
     def internal_forces(self):
         return self.__internal_forces
+
+    @property
+    def resultant_force(self):
+        return self.__resultant_force
+
+    @resultant_force.setter
+    def resultant_force(self, vec):
+        assert isinstance(vec, m_vec.Vector)
+        self.__resultant_force = vec
 
     @property
     def forces(self):

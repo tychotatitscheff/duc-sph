@@ -24,17 +24,13 @@ import app.solver.helper.grouper as h_group
 import app.solver.model.particle as m_part
 import app.solver.model.hash_table as m_hash
 
+import app.solver.model.vector as m_vec
 
 RADIUS_MULTIPLICATIVE = 3
 NUM_WORKER = 25
 GROUP_BY_LOW = 12
 
-def decorable(cls):
-    cls.__lshift__ = lambda obj, function: function(obj)
-    return cls
 
-
-@decorable
 class BaseSolver():
     """
     Basic class that can be decorated.
@@ -43,7 +39,7 @@ class BaseSolver():
         self.__tt = tt
         self.__t = 0
         self.__dt = dt
-        self.__particule = None
+        self.__particles = None
         self.__collisions_object = None
         self.__initialized = False
 
@@ -52,8 +48,8 @@ class BaseSolver():
         return self.__dt
 
     @property
-    def particules(self):
-        return self.__particules
+    def particles(self):
+        return self.__particles
 
     def __initialisation(self, l, n):
         raise NotImplementedError
@@ -61,10 +57,7 @@ class BaseSolver():
     def __compute_density_and_pressure(self):
         raise NotImplementedError
 
-    def __compute_internal_force(self):
-        raise NotImplementedError
-
-    def __compute_external_force(self):
+    def __compute__forces_and_integrate(self):
         raise NotImplementedError
 
     def run(self):
@@ -78,7 +71,7 @@ class Solver(BaseSolver):
     def __init__(self, solver):
         super().__init__(solver.integration_step)
         self.__solver = solver
-        self.__particules = solver.particules
+        self.__particles = solver.particles
         self.__t = solver.__tt
         self.__collision_object = solver.__collision_object
         self.__initialized = solver.__initialized
@@ -86,9 +79,12 @@ class Solver(BaseSolver):
         self.__dt = solver.dt
 
     @property
-    def dt(self, _dt):
+    def dt(self):
         return self.__dt
 
+    @dt.setter
+    def dt(self, t):
+        self.__dt = t
 
 
 class SphSolver(Solver):
@@ -96,11 +92,11 @@ class SphSolver(Solver):
 
     """
     def create_active_particle(self, location, radius, fluid):
-        m_part.ActiveParticule(self.__particules, location, radius, fluid)
+        m_part.ActiveParticle(self.__particles, location, radius, fluid)
 
     def __initialisation(self, l, n):
         # Initiate acceleration structure
-        self.__particules = m_hash.Hash(l, n)
+        self.__particles = m_hash.Hash(l, n)
         # Create collision Object
         # TODO : create collision object
 
@@ -114,16 +110,10 @@ class SphSolver(Solver):
         while self.__t < self.__tt:
             # Compute density and pressure
             self.__compute_density_and_pressure()
-            # Compute internal force
-            self.__compute_internal_force()
-            # Compute external force
-            self.__compute_external_force()
-            # Determine acceleration
-
-            # Integrate speed
-
-            # Integrate location
-
+            # Compute forces and integrate
+            self.__compute_forces_and_integrate()
+            #Update
+            self.__update()
             #End loop
             self.__t += self.dt
 
@@ -134,7 +124,7 @@ class SphSolver(Solver):
         def try_compute_density(items):
             for item in items:
                 try:
-                    assert isinstance(item, m_part.ActiveParticule)
+                    assert isinstance(item, m_part.ActiveParticle)
                     neigh = item.neighbour(RADIUS_MULTIPLICATIVE * item.radius)
                     item.density.__call__(item, neigh)
                     item.pressure.__call__(item)
@@ -143,8 +133,33 @@ class SphSolver(Solver):
 
         executor = concurrent.futures.ProcessPoolExecutor(NUM_WORKER)
         futures = [executor.submit(try_compute_density, group)
-                   for group in h_group.grouper(self.__particules.hash_table.values(), GROUP_BY_LOW)]
+                   for group in h_group.grouper(self.__particles.hash_table.values(), GROUP_BY_LOW)]
         concurrent.futures.wait(futures)
+
+    def __compute_forces_and_integrate(self):
+        def try_compute_forces_and_integrate(items):
+            for particle in items:
+                try:
+                    assert isinstance(particle, m_part.ActiveParticle)
+                    neigh = particle.neighbour(RADIUS_MULTIPLICATIVE * particle.radius)
+                    particle.resultant_force = m_vec.Vector([0, 0, 0])
+                    for force in particle.forces:
+                        assert isinstance(force, m_part.Force)
+                        force.__call__(particle, neigh)
+                        particle.resultant_force += force.value
+                    particle.future_acceleration = particle.resultant_force / particle.mass
+                    particle.future_speed = particle.current_speed + particle.future_acceleration * self.dt
+                    particle.future_location = particle.current_location + particle.future_speed * self.dt
+                except Exception as e:
+                    print(e)
+
+        executor = concurrent.futures.ProcessPoolExecutor(NUM_WORKER)
+        futures = [executor.submit(try_compute_forces_and_integrate, group)
+                   for group in h_group.grouper(self.__particles.hash_table.values(), GROUP_BY_LOW)]
+        concurrent.futures.wait(futures)
+
+    def __update(self):
+        pass
 
 
 if __name__ == "__main__":
