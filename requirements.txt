@@ -1,2 +1,4 @@
+Cython
+PyQt4
 pytest
 numpy

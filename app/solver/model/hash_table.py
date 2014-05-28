@@ -23,7 +23,8 @@ from math import *
 
 import app.solver.helper.prime as m_pr
 import app.solver.model.vector as m_vec
-#import app.solver.model.particule as m_part
+
+#import app.solver.model.particle as m_part
 
 
 class Hash():

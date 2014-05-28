@@ -28,8 +28,10 @@ Requires: Python 2.5 and numpy 1.0.4
 (c) Ilan Schnell, 2008
 '''
 
-import numpy
 import math
+
+import numpy
+
 
 _TINY = 1e-15
 
@@ -41,7 +43,7 @@ def _xyz_to_012(c):
         raise AttributeError("vec3 instance has no attribute '%s'" % c)
 
 
-def _args2tuple(name, args):
+def _args_to_tuple(name, args):
     n_arg = len(args)
     if n_arg == 0:
         data = 3*(0,)
@@ -70,7 +72,7 @@ class Vector(numpy.ndarray):
                 return args[0].copy()
             if isinstance(args[0], numpy.matrix):
                 return Vector(args[0].flatten().tolist()[0])
-        data = _args2tuple('__new__', args)
+        data = _args_to_tuple('__new__', args)
         arr = numpy.array(data, dtype=numpy.float, copy=True)
         return numpy.ndarray.__new__(cls, shape=(3,), buffer=arr)
 
@@ -101,6 +103,9 @@ class Vector(numpy.ndarray):
     def norm(self):
         return math.sqrt(self ** 2)
 
+    def a_max(self):
+        return numpy.amax(self)
+
     def get_spherical(self):
         r = abs(self)
         if r < _TINY:
@@ -113,7 +118,7 @@ class Vector(numpy.ndarray):
         return r, theta, phi
 
     def set_spherical(self, *args):
-        r, theta, phi = _args2tuple('set_spherical', args)
+        r, theta, phi = _args_to_tuple('set_spherical', args)
         self[0] = r * math.sin(theta) * math.cos(phi)
         self[1] = r * math.sin(theta) * math.sin(phi)
         self[2] = r * math.cos(theta)
@@ -125,7 +130,7 @@ class Vector(numpy.ndarray):
         return rho, phi, z
 
     def set_cylindrical(self, *args):
-        rho, phi, z = _args2tuple('set_cylindrical', args)
+        rho, phi, z = _args_to_tuple('set_cylindrical', args)
         self[0] = rho * math.cos(phi)
         self[1] = rho * math.sin(phi)
         self[2] = z
