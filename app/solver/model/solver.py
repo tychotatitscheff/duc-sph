@@ -171,9 +171,7 @@ class SphSolver(Solver):
                     assert isinstance(particle, m_part.ActiveParticle)
                     for coll_obj in self.__collision_objects:
                         assert isinstance(coll_obj, m_col.CollisionObject)
-                        corrected_location, corrected_speed = coll_obj.react(particle.future_location)
-                        particle.future_location = corrected_location
-                        particle.future_speed = corrected_speed
+                        coll_obj.react(particle.future_location, self.dt)
                 except Exception as e:
                     print(e)
 
