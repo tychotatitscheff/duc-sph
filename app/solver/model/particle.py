@@ -63,7 +63,6 @@ class ActiveParticle(object):
         self.__resultant_force = m_vec.Vector([0, 0, 0])
 
         # Integrated properties
-        self.__old_location = Position("Old location of " + str(self.__hash__()), location)
         self.__current_location = Position("Current location of " + str(self.__hash__()), location)
         self.__future_location = Position("Future location of " + str(self.__hash__()), location)
 
@@ -139,14 +138,6 @@ class ActiveParticle(object):
         return self.__pressure
 
     ### Location
-
-    @property
-    def old_location(self):
-        return self.__old_location
-
-    @old_location.setter
-    def old_location(self, loc):
-        self.__old_location = loc
 
     @property
     def current_location(self):

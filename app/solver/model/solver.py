@@ -22,6 +22,7 @@ import concurrent.futures
 
 import app.solver.helper.grouper as h_group
 import app.solver.model.particle as m_part
+import app.solver.model.collision as m_col
 import app.solver.model.hash_table as m_hash
 
 import app.solver.model.vector as m_vec
@@ -40,7 +41,7 @@ class BaseSolver():
         self.__t = 0
         self.__dt = dt
         self.__particles = None
-        self.__collisions_object = None
+        self.__collisions_objects = []
         self.__initialized = False
 
     @property
@@ -60,6 +61,9 @@ class BaseSolver():
     def __compute__forces_and_integrate(self):
         raise NotImplementedError
 
+    def __check_for_collision(self):
+        raise NotImplementedError
+
     def run(self):
         raise NotImplementedError
 
@@ -73,7 +77,7 @@ class Solver(BaseSolver):
         self.__solver = solver
         self.__particles = solver.particles
         self.__t = solver.__tt
-        self.__collision_object = solver.__collision_object
+        self.__collision_objects = solver.__collision_objects
         self.__initialized = solver.__initialized
         self.__integration_step = solver.integration_step
         self.__dt = solver.dt
@@ -97,8 +101,8 @@ class SphSolver(Solver):
     def __initialisation(self, l, n):
         # Initiate acceleration structure
         self.__particles = m_hash.Hash(l, n)
-        # Create collision Object
-        # TODO : create collision object
+        # Append collision Object
+        self.__collision_objects.append(m_col.Box(0.5))
 
     def run(self):
         # Initialize the system if not
@@ -112,6 +116,8 @@ class SphSolver(Solver):
             self.__compute_density_and_pressure()
             # Compute forces and integrate
             self.__compute_forces_and_integrate()
+            #Check for collision
+
             #Update
             self.__update()
             #End loop
@@ -155,6 +161,24 @@ class SphSolver(Solver):
 
         executor = concurrent.futures.ProcessPoolExecutor(NUM_WORKER)
         futures = [executor.submit(try_compute_forces_and_integrate, group)
+                   for group in h_group.grouper(self.__particles.hash_table.values(), GROUP_BY_LOW)]
+        concurrent.futures.wait(futures)
+
+    def __check_for_collision(self):
+        def try_check_for_collision(items):
+            for particle in items:
+                try:
+                    assert isinstance(particle, m_part.ActiveParticle)
+                    for coll_obj in self.__collision_objects:
+                        assert isinstance(coll_obj, m_col.CollisionObject)
+                        corrected_location, corrected_speed = coll_obj.react(particle.future_location)
+                        particle.future_location = corrected_location
+                        particle.future_speed = corrected_speed
+                except Exception as e:
+                    print(e)
+
+        executor = concurrent.futures.ProcessPoolExecutor(NUM_WORKER)
+        futures = [executor.submit(try_check_for_collision, group)
                    for group in h_group.grouper(self.__particles.hash_table.values(), GROUP_BY_LOW)]
         concurrent.futures.wait(futures)
 

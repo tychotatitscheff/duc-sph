@@ -29,7 +29,7 @@ class CollisionObject(object):
     def __detect(self, x):
         pass
 
-    def __react(self, x):
+    def react(self, x):
         pass
 
 
@@ -66,7 +66,7 @@ class Sphere(ImplicitPrimitive):
         r = self.__r
         return (x - c) ** 2 - r ** 2
 
-    def __react(self, x):
+    def react(self, x):
         c = self.__c
         r = self.__r
         f = self.__implicit_function(x)
