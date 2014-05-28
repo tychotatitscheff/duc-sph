@@ -5,7 +5,7 @@ __author__ = "Clément Eberhardt," \
              "Clément Léost," \
              "Benoit Picq," \
              "Théo Subtil" \
-             "and Tycho Tatitscheff"
+             " and Tycho Tatitscheff"
 __copyright__ = "Copyright 2014, DucSph"
 __credits__ = ["Clément Eberhardt",
                "Clément Léost",
@@ -18,7 +18,14 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
+import jsonpickle
 
-if __name__ == "__main__":
-    import app.solver.model.fluid
-    import app.gui
+
+def json_encode(obj):
+    pickled = jsonpickle.encode(obj)
+    return pickled
+
+
+def json_decode(json):
+    de_pickled = jsonpickle.decode(json)
+    return de_pickled
