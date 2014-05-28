@@ -50,3 +50,7 @@ class Fluid(object):
     @property
     def sigma(self):
         return self.__sigma
+
+    @property
+    def cr(self):
+        return self.__cr

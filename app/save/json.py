@@ -18,6 +18,14 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
-import pytest
-import app.solver.model.kernel
+import jsonpickle
 
+
+def json_encode(obj):
+    pickled = jsonpickle.encode(obj)
+    return pickled
+
+
+def json_decode(json):
+    de_pickled = jsonpickle.decode(json)
+    return de_pickled
