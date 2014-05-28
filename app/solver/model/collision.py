@@ -19,6 +19,7 @@ __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
 import app.solver.model.vector as m_vec
+import app.solver.model.particle as m_part
 import math
 
 
@@ -29,7 +30,16 @@ class CollisionObject(object):
     def __detect(self, x):
         pass
 
-    def react(self, x):
+    @staticmethod
+    def __reaction(particle, cp, d, n_cp, dt):
+        u = particle.future_speed.value
+        cr = particle.fluid.cr
+        u -= (1 + cr * d / (dt * u.norm)) * m_vec.dot(u, n_cp) * n_cp
+
+        particle.future_location.value = cp
+        particle.future_speed.value = u
+
+    def react(self, particle, dt):
         pass
 
 
@@ -66,19 +76,20 @@ class Sphere(ImplicitPrimitive):
         r = self.__r
         return (x - c) ** 2 - r ** 2
 
-    def react(self, x):
+    def react(self, particle, dt):
+        assert isinstance(particle, m_part.ActiveParticle)
+        x = particle.future_location.value
+        u = particle.future_speed.value
         c = self.__c
         r = self.__r
         f = self.__implicit_function(x)
 
         if self.__detect(x):
-            contact_point = c + r * (x - c) / (x - c).norm()
-            penetration_length = math.fabs((x - c).norm() - r)
-            surface_normal_at_contact = math.copysign(1, f) * (x - c) / (c - x).norm()
-        else:
-            contact_point, penetration_length, surface_normal_at_contact = None
+            cp = c + r * (x - c) / (x - c).norm()
+            d = math.fabs((x - c).norm() - r)
+            n_cp = math.copysign(1, f) * (x - c) / (c - x).norm()
 
-        return contact_point, penetration_length, surface_normal_at_contact
+            self.__reaction(particle, cp, d, n_cp, dt)
 
 
 class Box(ImplicitPrimitive):

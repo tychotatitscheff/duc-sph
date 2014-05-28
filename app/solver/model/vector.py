@@ -138,6 +138,10 @@ def cross(a, b):
 
 
 def dot(a, b):
+    """
+
+    :rtype : float
+    """
     return numpy.dot(a, b)
 
 
