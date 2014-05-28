@@ -29,8 +29,8 @@ f1 = s_f.Fluid(1, 1, 1, 1, 1, 1, 1)
 p = s_p.ActiveParticle(h1, [3, 3, 3], f1, 1, m_vec.Vector(1, 1, 1), m_vec.Vector([0, 0, 1]), 5)
 
 
-class TestHash:    def test_compute_r_chap_return_float_(self):
-
+class TestHash:
+    def test_compute_r_chap_return_float_(self):
         assert isinstance(h1.compute_r_chap(p, future=False), int)
 
     def test_compute_r_chap_raise_attribute_error(self):
