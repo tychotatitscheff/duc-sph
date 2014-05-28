@@ -20,5 +20,5 @@ __status__ = "Production"
 
 
 if __name__ == "__main__":
-    import app.solver
+    import app.solver.model.fluid
     import app.gui

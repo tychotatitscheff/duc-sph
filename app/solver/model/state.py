@@ -105,6 +105,22 @@ class ColorField(EstimatedState):
             color += self.factor(n) * self.__kernel.__call__(r)
 
 
+class SurfaceTensionVector(EstimatedState):
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        super().__init__(name, val)
+        self.__kernel = kern
+
+    @staticmethod
+    def factor(neighbour):
+        return neighbour.mass / neighbour.rho
+
+    def __call__(self, particle, neighbour):
+        n = m_vec.Vector([0, 0, 0])
+        for neigh in neighbour:
+            r = particle.location.value - neigh.location.value
+            n += self.factor(neigh) * self.__kernel.gradient(r)
+
+
 class Pressure(EstimatedState):
     def __init__(self, name, val):
         assert isinstance(val, float) or isinstance(val, int)
@@ -113,8 +129,10 @@ class Pressure(EstimatedState):
         self.__unit = "Pa"
 
     @staticmethod
-    def factor(particle: m_part.ActiveParticule):
-        return particle.density.value * particle.fluid.k
+    def factor(particle, isotherm):
+        if isotherm:
+
+            return (particle.density.value - particle.fluid.rho0) * particle.fluid.k
 
     def __call__(self, particle):
         pressure = self.factor(particle)
@@ -157,12 +175,12 @@ class ForcePressure(Force):
         assert isinstance(particle, m_part.ActiveParticule)
         assert isinstance(n, m_part.ActiveParticule)
 
-        mj = n.mass
+        m_j = n.mass
         rho_j = n.density
         rho_i = particle.density
         pj = n.pressure
         pi = particle.pressure
-        return -mj * rho_i * (pi / (rho_i ** 2) + pj / (rho_j ** 2))
+        return -m_j * rho_i * (pi / (rho_i ** 2) + pj / (rho_j ** 2))
 
 
 class ForceViscosity(Force):
