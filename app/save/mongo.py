@@ -37,3 +37,13 @@ def drop_database(name):
             client.database_names().index(i).drop()
 
 
+def create_collection(name, database):
+    collection = database[name]
+    return collection
+
+
+def create_document(document, collection):
+    post_id = collection.insert(document)
+    print(post_id)
+
+
