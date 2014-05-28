@@ -341,18 +341,19 @@ class SurfaceTensionDirection(State):
 
 
 class SurfaceTension(State):
-    def __init__(self, name, kern: m_kern.Kernel, val, particle):
+    def __init__(self, name, kern: m_kern.Kernel, val):
         super().__init__(name, val)
         self.__kernel = kern
 
     def __call__(self, part, neighbour):
         assert isinstance(part, ActiveParticle)
-        force = 0
-        CF = ColourField("CF", m_kern.Kernel, 0)
-        STD = SurfaceTensionDirection("STD", m_kern.Kernel, 0)
-        for n in neighbour:
-            force = - part.fluid.sigma * CF.laplacian(part, n) * STD.gradient(part, n) / \
-                    STD.gradient(part, n).m_vec.Vector.norm(n)
+        force = m_vec.Vector([0, 0, 0])
+        cf = ColourField("CF", m_kern.Kernel, 0)
+        std = SurfaceTensionDirection("STD", m_kern.Kernel, 0)
+        if std.gradient(part, neighbour) >= part.fluid.l:  # Only compute surface tension when close to the surface
+            for n in neighbour:
+                force = - part.fluid.sigma * cf.laplacian(part, n) * std.gradient(part, n) / \
+                    std.gradient(part, n).m_vec.Vector.norm(n)
         return force
 
 
