@@ -18,32 +18,14 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
-from pymongo import MongoClient
-client = MongoClient()
+import jsonpickle
 
 
-def create_database(nom):
-    db = client[nom]
-    return db
+def json_encode(obj):
+    pickled = jsonpickle.encode(obj)
+    return pickled
 
 
-def check_database(name):
-    print(name in client.database_names())
-
-
-def drop_database(name):
-    for i in (0, client.database_names().count()):
-        if client.database_names().index(i) is name:
-            client.database_names().index(i).drop()
-
-
-def create_collection(name, database):
-    collection = database[name]
-    return collection
-
-
-def create_document(document, collection):
-    post_id = collection.insert(document)
-    print(post_id)
-
-
+def json_decode(json):
+    de_pickled = jsonpickle.decode(json)
+    return de_pickled

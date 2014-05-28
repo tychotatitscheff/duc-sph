@@ -2,3 +2,5 @@ Cython
 PyQt4
 pytest
 numpy
+jsonpickle
+pymongo

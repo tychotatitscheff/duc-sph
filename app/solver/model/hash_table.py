@@ -71,13 +71,13 @@ class Hash():
         l = self.__l
 
         if not future:
-            r_x = _object.location.value[0]
-            r_y = _object.location.value[1]
-            r_z = _object.location.value[2]
+            r_x = _object.current_location.value[0]
+            r_y = _object.current_location.value[1]
+            r_z = _object.current_location.value[2]
         else:
             r_x = _object.future_location.value[0]
-            r_y = _object.location.value[1]
-            r_z = _object.location.value[2]
+            r_y = _object.future_location.value[1]
+            r_z = _object.future_location.value[2]
 
         r_chap = m_vec.Vector([floor(r_x / l), floor(r_y / l), floor(r_z / l)])
 
