@@ -36,3 +36,4 @@ def drop_database(name):
         if client.database_names().index(i) is name:
             client.database_names().index(i).drop()
 
+
