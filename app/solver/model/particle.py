@@ -24,6 +24,7 @@ from math import *
 
 import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
+import app.solver.model.hash_table as m_hash
 
 RAD_MUL = 2
 ATMOSPHERIC_PRESSURE = 1
@@ -43,6 +44,7 @@ class ActiveParticle(object):
         :type radius: float
         """
         # Structure
+        assert isinstance(hash_particle, m_hash.Hash)
         self.__hash_particle = hash_particle
 
         # Constant properties
@@ -83,6 +85,7 @@ class ActiveParticle(object):
             self.__hash_particle.remove(self)
         except ValueError:
             pass
+        del self
 
     ### Acceleration structure
 
