@@ -24,7 +24,7 @@ try:
     import app.solver.model.particule as m_part
 except AttributeError:
     pass
-import app.solver.model.solver as m_solver
+
 
 
 class State(object):
@@ -113,7 +113,7 @@ class Pressure(EstimatedState):
         self.__unit = "Pa"
 
     @staticmethod
-    def factor(particle: m_part.ActiveParticule):
+    def factor(particle):
         return particle.density.value * particle.fluid.k
 
     def __call__(self, particle):
@@ -192,24 +192,9 @@ class ForceGravity(Force):
 
 
 class Speed(IntegratedState):
-    def __init__(self, name, val, particle):
-        assert isinstance(val, m_vec.Vector)
-        assert isinstance(particle, m_part)
+    def __init__(self, name, val):
         super().__init__(name, val)
         self.__unit = "m/s"
-
-    def __call__(self,  particle):
-        """
-        Integration d'euler
-        """
-        assert isinstance(particle, m_part.ActiveParticule)
-
-        a = particle.acceleration()
-        dt = m_solver.Solver.dt
-        speed = particle.speed
-
-        speed += a*dt
-        return speed
 
 
 class Position(IntegratedState):
@@ -217,19 +202,6 @@ class Position(IntegratedState):
         assert isinstance(val, m_vec.Vector)
         super().__init__(name, val)
         self.__unit = "m"
-
-    def __call__(self, particle):
-        """
-        integration euler
-        """
-        assert isinstance(particle, m_part.ActiveParticule)
-
-        speed = particle.speed
-        dt = m_solver.Solver.dt
-        loc = particle.location
-
-        loc += speed*dt
-        return loc
 
 
 if __name__ == "__main__":

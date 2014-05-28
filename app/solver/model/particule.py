@@ -168,6 +168,7 @@ class ActiveParticule(_Particule):
 
     @fluid.setter
     def fluid(self, flu):
+        assert isinstance(flu, m_fluid.Fluid)
         self.__fluid = flu
 
     @property

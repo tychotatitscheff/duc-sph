@@ -47,16 +47,25 @@ class Hash():
         return self.__hash_table
 
     def insert(self, _object):
+        """
+        Insert a new particle in the volume
+        """
         r_chap = self.compute_r_chap(_object)
         h = self.compute_hash(r_chap)
         self.__hash_table[h].append(_object)
 
     def remove(self, _object):
+        """
+        Delete the existent hash_table and create a new one
+        """
         r_chap = self.compute_r_chap(_object)
         h = self.compute_hash(r_chap)
         self.__hash_table[h].remove(_object)
 
     def update(self, _object):
+        """
+        Update the particles in the volume
+        """
         r_chap_old = self.compute_r_chap(_object)
         r_chap_new = self.compute_r_chap(_object, future=True)
 
@@ -67,6 +76,9 @@ class Hash():
         self.__hash_table[h_new].append(_object)
 
     def compute_r_chap(self, _object, future=False):
+        """
+        Affecte à chaque particule une case
+        """
         l = self.__l
 
         if not future:
@@ -75,14 +87,17 @@ class Hash():
             r_z = _object.location.value[2]
         else:
             r_x = _object.future_location.value[0]
-            r_y = _object.location.value[1]
-            r_z = _object.location.value[2]
+            r_y = _object.future_location.value[1]
+            r_z = _object.future_location.value[2]
 
         r_chap = m_vec.Vector([floor(r_x / l), floor(r_y / l), floor(r_z / l)])
 
         return r_chap
 
     def compute_hash(self, r_chap):
+        """
+        applique le produit csaur(... ?!) afin de rattacher à la case le nombre hash
+        """
         n_h = self.__n_h
         p1 = self.__p1
         p2 = self.__p2
@@ -97,11 +112,17 @@ class Hash():
         return __hash
 
     def query(self, x, y, z):
+        """
+        recherche les particule qui se trouve dans la case numéro 'hash'
+        """
         __hash = self.compute_hash(m_vec.Vector([x, y, z]))
         if __hash in self.__hash_table:
             return self.__hash_table[__hash]
 
     def search(self, _object, kernel_h, approx=True):
+        """
+        Définit la zone dans laquelle on cherche les voisins
+        """
         l = self.__l
 
         r_chap_obj = self.compute_r_chap(_object)
