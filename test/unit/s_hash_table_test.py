@@ -26,7 +26,7 @@ import app.solver.model.vector as m_vec
 
 h1 = s_h.Hash(76, 212)
 f1 = s_f.Fluid(1, 1, 1, 1, 1, 1, 1)
-p = s_p.ActiveParticle(h1, [3, 3, 3], f1, 1, m_vec.Vector(1, 1, 1), m_vec.Vector([0, 0, 1]), 5)
+p = s_p.ActiveParticle(h1, m_vec.Vector([3, 3, 3]), f1, 1, m_vec.Vector([1, 1, 1]), m_vec.Vector([0, 0, 1]), 5)
 
 
 class TestHash:
