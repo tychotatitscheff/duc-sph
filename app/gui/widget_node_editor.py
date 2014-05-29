@@ -42,7 +42,6 @@ class NodeEditor(QtGui.QGraphicsView):
         self.setRubberBandSelectionMode(QtCore.Qt.IntersectsItemShape)
         self.setScene(self.scene)
 
-
     #alt drag scroll bar, permet de se deplacer dans le graph grace a la touche alt.
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Alt:
