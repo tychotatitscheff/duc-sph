@@ -18,8 +18,6 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
-
-
 from math import *
 
 import app.solver.model.vector as m_vec
@@ -37,6 +35,7 @@ class ActiveParticle(object):
     """
     Particle class.
     """
+
     def __init__(self, hash_particle, location: m_vec, fluid, radius, speed=m_vec.Vector([0, 0, 0]),
                  acceleration=m_vec.Vector([0, 0, 0]), rad_mul=RAD_MUL):
         """
@@ -124,7 +123,7 @@ class ActiveParticle(object):
 
     @property
     def mass(self):
-        return 4/3 * pi * (self.radius ** 3) * self.fluid.rho0
+        return 4 / 3 * pi * (self.radius ** 3) * self.fluid.rho0
 
     @mass.setter
     def mass(self, mass):
@@ -243,6 +242,7 @@ class ActiveParticle(object):
         self.hash_particle.update(self)
         self.current_location = self.future_location
 
+
 ############################################### Definition of the states ###############################################
 
 
@@ -250,6 +250,7 @@ class State(object):
     """
     This class defines a state (force, temp).
     """
+
     def __init__(self, name, val):
         self.__value = val
         self.__name = name
@@ -300,6 +301,7 @@ class ColourField(State):
     M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
+
     def __init__(self, name, kernel: m_kern.Kernel, val):
         super().__init__(name, val)
         self.__kernel = kernel

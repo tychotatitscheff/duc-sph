@@ -52,7 +52,6 @@ class SphSolver():
     def dt(self, t):
         self.__dt = t
 
-
     @property
     def tt(self):
         return self.__tt
