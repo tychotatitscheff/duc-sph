@@ -2,10 +2,9 @@ __author__ = 'salas'
 import sys
 
 import qdarkstyle
-
 from PyQt4 import QtGui, QtCore
 
-import app.gui.widget_gl as g_gl
+import app.gui.widgets.glViewer as g_gl
 import app.gui.widget_node_editor as g_ne
 
 
