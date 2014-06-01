@@ -28,7 +28,7 @@ import app.solver.model.vector as m_vec
 
 
 class Hash():
-    def __init__(self, l, n, p1=73856093, p2=19349663, p3=83492791):
+    def __init__(self, l, n, p1=111, p2=19349663, p3=83492791):
         """
         l : cell size
         n : number of particle

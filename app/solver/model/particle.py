@@ -309,10 +309,16 @@ class ColourField(State):
         return neighbour.mass / neighbour.rho
 
     def __call__(self, particle, neighbour):
-        color = 0
+        colour = 0
         for n in neighbour:
             r = particle.location.value - n.location.value
-            color += self.factor(n) * self.__kernel.__call__(r)
+            colour += self.factor(n) * self.__kernel.__call__(r)
+
+    def laplacian(self, particle, neighbour):
+        colour = 0
+        for n in neighbour:
+            r = particle.location.value - n.location.value
+            colour += self.factor(n) * self.__kernel.laplacian(r)
 
 
 class SurfaceTensionDirection(State):
@@ -328,7 +334,30 @@ class SurfaceTensionDirection(State):
         n = m_vec.Vector([0, 0, 0])
         for neigh in neighbour:
             r = particle.location.value - neigh.location.value
+            n += self.factor(neigh) * self.__kernel.__call__(r)
+
+    def gradient(self, particle, neighbour):
+        n = m_vec.Vector([0, 0, 0])
+        for neigh in neighbour:
+            r = particle.location.value - neigh.location.value
             n += self.factor(neigh) * self.__kernel.gradient(r)
+
+
+class SurfaceTension(State):
+    def __init__(self, name, kern: m_kern.Kernel, val):
+        super().__init__(name, val)
+        self.__kernel = kern
+
+    def __call__(self, part, neighbour):
+        assert isinstance(part, ActiveParticle)
+        force = m_vec.Vector([0, 0, 0])
+        cf = ColourField("CF", m_kern.Kernel, 0)
+        std = SurfaceTensionDirection("STD", m_kern.Kernel, 0)
+        if std.gradient(part, neighbour) >= part.fluid.l:  # Only compute surface tension when close to the surface
+            for n in neighbour:
+                force = - part.fluid.sigma * cf.laplacian(part, n) * std.gradient(part, n) / \
+                    std.gradient(part, n).m_vec.Vector.norm(n)
+        return force
 
 
 class Pressure(State):

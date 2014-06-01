@@ -40,6 +40,10 @@ class Fluid(object):
         return self.__rho0
 
     @property
+    def l(self):
+        return self.__l
+
+    @property
     def k(self):
         return self.__k
 
