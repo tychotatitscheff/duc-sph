@@ -48,7 +48,7 @@ class ActiveParticle(object):
             :param speed: speed
             :param acceleration: acceleration
             :param rad_mul: multiplier factor
-            :type hash_particle: hash_particle
+            :type hash_particle: m_hash.Hash (hash_particle)
             :type location: point.Point (vector)
             :type radius: float
             :type rad_mul: float
@@ -56,7 +56,7 @@ class ActiveParticle(object):
             :type speed: vector (m_vec)
             :type: acceleration: vector
         """
-         assert isinstance(hash_particle, m_hash.Hash)
+        assert isinstance(hash_particle, m_hash.Hash)
         self.__hash_particle = hash_particle
 
         # Constant properties

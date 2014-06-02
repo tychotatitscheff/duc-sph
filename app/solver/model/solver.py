@@ -39,8 +39,8 @@ class SphSolver():
     def __init__(self, tt, dt):
         """
 
-        :param tt: times
-        :param dt: interval
+        :param tt: total times
+        :param dt: interval / step
         :type tt: float
         :type dt: float
         """
