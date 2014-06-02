@@ -23,11 +23,10 @@ import concurrent.futures
 import app.solver.helper.grouper as h_group
 import app.solver.model.particle as m_part
 import app.solver.model.collision as m_col
-import app.solver.model.particle as m_part
-import app.solver.model.collision as m_col
+
+import app.solver.model.kernel as m_kern
 import app.solver.model.hash_table as m_hash
 
-import app.solver.model.vector as m_vec
 import app.solver.model.vector as m_vec
 
 RADIUS_MULTIPLICATIVE = 3
@@ -36,13 +35,19 @@ GROUP_BY_LOW = 12
 
 
 class SphSolver():
-    def __init__(self, tt, dt):
+    def __init__(self, tt, dt, hashing):
+        """
+
+        :param tt: total times
+        :param dt: interval / step
+        :type tt: float
+        :type dt: float
+        """
         self.__tt = tt
         self.__t = 0
         self.__dt = dt
-        self.__particles = None
+        self.__particles = hashing
         self.__collisions_objects = []
-        self.__initialized = False
 
     @property
     def dt(self):
@@ -65,29 +70,29 @@ class SphSolver():
     def particles(self):
         return self.__particles
 
-    @property
-    def initialized(self):
-        return self.__initialized
+    def create_active_particle(self, location, fluid, radius, fluid_type="liquid", gravity=True):
+        """
 
-    @initialized.setter
-    def initialized(self, val):
-        self.__initialized = val
+        :param location: location of the particle
+        :param radius: h
+        :param fluid: type of the particle
+        :type location: vector (m_vec)
+        :type radius: float
+        :type fluid: fluid
+        """
 
-    def create_active_particle(self, location, radius, fluid):
-        m_part.ActiveParticle(self.particles, location, radius, fluid)
+        act_part = m_part.ActiveParticle(self.particles, location, fluid, radius)
+        if fluid_type == "liquid":
+            vec_null = m_vec.Vector([0, 0, 0])
 
-    def initialisation(self, l, n):
-        # Initiate acceleration structure
-        self.__particles = m_hash.Hash(l, n)
-        # Append collision Object
+            k_d = m_kern.DefaultKernel(radius * 3)
+            k_v = m_kern.ViscosityKernel(radius * 3)
+
+            f_p = m_part.ForcePressure("Pressure", k_d, vec_null)
+            f_v = m_part.ForceViscosity("Viscosity", k_v, vec_null)
 
     def run(self):
         # Initialize the system if not
-        if not self.__initialized:
-            # TODO l, n
-            l = 3
-            n = 100
-            self.initialisation(l, n)
         while self.__t < self.__tt:
             # Compute density and pressure
             self.__compute_density_and_pressure()
@@ -146,7 +151,7 @@ class SphSolver():
             for particle in items:
                 try:
                     assert isinstance(particle, m_part.ActiveParticle)
-                    for coll_obj in self.collision_objects:
+                    for coll_obj in self.collisions_objects:
                         assert isinstance(coll_obj, m_col.CollisionObject)
                         coll_obj.react(particle.future_location, self.dt)
                 except Exception as e:
