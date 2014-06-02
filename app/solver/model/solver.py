@@ -71,6 +71,16 @@ class SphSolver():
         return self.__particles
 
     def create_active_particle(self, location, fluid, radius, fluid_type="liquid", gravity=True):
+        """
+
+        :param location: location of the particle
+        :param radius: h
+        :param fluid: type of the particle
+        :type location: vector (m_vec)
+        :type radius: float
+        :type fluid: fluid
+        """
+
         act_part = m_part.ActiveParticle(self.particles, location, fluid, radius)
         if fluid_type == "liquid":
             vec_null = m_vec.Vector([0, 0, 0])
@@ -79,10 +89,7 @@ class SphSolver():
             k_v = m_kern.ViscosityKernel(radius * 3)
 
             f_p = m_part.ForcePressure("Pressure", k_d, vec_null)
-            act_part.append_force(f_p)
-
             f_v = m_part.ForceViscosity("Viscosity", k_v, vec_null)
-            act_part.append_force(f_v)
 
     def run(self):
         # Initialize the system if not

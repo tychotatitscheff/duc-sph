@@ -332,7 +332,7 @@ class ColourField(State):
             colour += self.factor(n) * self.__kernel.laplacian(r)
 
 
-class SurfaceTensionDirection(State):
+class DirectionSurfaceTension(State):
     def __init__(self, name, kern: m_kern.Kernel, val):
         super().__init__(name, val)
         self.__kernel = kern
@@ -354,7 +354,7 @@ class SurfaceTensionDirection(State):
             n += self.factor(neigh) * self.__kernel.gradient(r)
 
 
-class SurfaceTension(State):
+class ForceSurfaceTension(State):
     def __init__(self, name, kern: m_kern.Kernel, val):
         super().__init__(name, val)
         self.__kernel = kern
@@ -363,7 +363,7 @@ class SurfaceTension(State):
         assert isinstance(part, ActiveParticle)
         force = m_vec.Vector([0, 0, 0])
         cf = ColourField("CF", m_kern.Kernel, 0)
-        std = SurfaceTensionDirection("STD", m_kern.Kernel, 0)
+        std = DirectionSurfaceTension("STD", m_kern.Kernel, 0)
         if std.gradient(part, neighbour) >= part.fluid.l:  # Only compute surface tension when close to the surface
             for n in neighbour:
                 force = - part.fluid.sigma * cf.laplacian(part, n) * std.gradient(part, n) / \
