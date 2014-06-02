@@ -20,14 +20,12 @@ __status__ = "Production"
 
 import concurrent.futures
 
+import math
+
 import app.solver.helper.grouper as h_group
 import app.solver.model.particle as m_part
 import app.solver.model.collision as m_col
-import app.solver.model.particle as m_part
-import app.solver.model.collision as m_col
 import app.solver.model.hash_table as m_hash
-
-import app.solver.model.vector as m_vec
 import app.solver.model.vector as m_vec
 
 RADIUS_MULTIPLICATIVE = 3
@@ -172,3 +170,42 @@ class SphSolver():
                    for group in h_group.grouper(self.__particles.hash_table.values(), GROUP_BY_LOW)]
         concurrent.futures.wait(futures)
 
+    def initial_volume(self, primitive, particle, **kwargs):
+        assert isinstance(particle, m_part.ActiveParticle)
+        r = particle.radius
+        if primitive == "non oriented cube":
+            # c = kwargs['centre']
+            # assert isinstance(c, m_vec.Vector)
+            s = kwargs['size']
+            assert isinstance(s, float)
+            partlist = []
+            dim1 = 0
+            dim2 = 0
+            dim3 = 0
+            while dim1 < s:
+                if :
+                    partlist.append([dim1, r, r])
+                while dim2 < s:
+                    if [r, dim2, r] in partlist is False:
+                        partlist.append([r, dim2, r])
+                    while dim3 < s:
+                        if [r, r, dim3] in partlist is False:
+                            partlist.append([r, r, dim3])
+                        dim3 += 1
+                        if dim3 > s:
+                            break
+                    dim2 += 1
+                    if dim2 > s:
+                        break
+                dim1 += 1
+                if dim1 > s:
+                    break
+            return partlist
+
+if __name__ == "__main__":
+    A = SphSolver(100, 1)
+    H = m_hash.Hash(2, 2000)
+    import app.solver.model.fluid as m_flu
+    flu = m_flu.Fluid(1000, 1, 0.05, 0.00005, 1, 10, 2)
+    part1 = m_part.ActiveParticle(H, m_vec.Vector([0, 0, 0]), flu, 1)
+    print(A.initial_volume("non oriented cube", part1, size=4.))
