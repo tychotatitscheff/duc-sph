@@ -29,8 +29,11 @@ import pytest
 hashing = m_hash.Hash(2, 2001)
 solve = m_solver.SphSolver(10, 0.1, hashing)
 fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
-vec = m_vec.Vector([random.randint(0, 1000), random.randint(0, 1000), random.randint(0, 1000)])
-solve.create_active_particle(vec, fl, 1.)
+random_vec = lambda: m_vec.Vector([random.randint(0, 1000), random.randint(0, 1000), random.randint(0, 1000)])
+list_vec = [random_vec() for i in range(0, 1000)]
+for vec in list_vec:
+    solve.create_active_particle(vec, fl, 1.)
+solve.run()
 print("")
 
 

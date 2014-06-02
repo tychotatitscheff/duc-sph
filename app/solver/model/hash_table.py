@@ -147,7 +147,7 @@ class Hash():
         else:
             val = []
             for it in possible:
-                distance = (it.location.value - _object.location.value).norm()
+                distance = (it.current_location.value - _object.current_location.value).norm()
                 if distance < kernel_h:
                     val.append(it)
             return val

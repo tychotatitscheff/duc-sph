@@ -89,7 +89,7 @@ class Vector(numpy.ndarray):
         return (self * self) if x == 2 else pow(abs(self), x)
 
     def __eq__(self, other):
-        return abs(self-other) < _TINY
+        return abs(self - other) < _TINY
 
     def __ne__(self, other):
         return not self == other
