@@ -117,7 +117,7 @@ class ActiveParticle(object):
 
     @property
     def rho0(self):
-        return self.fluid.rho
+        return self.fluid.rho0
 
     ### Mass
 
