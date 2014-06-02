@@ -36,6 +36,13 @@ GROUP_BY_LOW = 12
 
 class SphSolver():
     def __init__(self, tt, dt, hashing):
+        """
+
+        :param tt: total times
+        :param dt: interval / step
+        :type tt: float
+        :type dt: float
+        """
         self.__tt = tt
         self.__t = 0
         self.__dt = dt

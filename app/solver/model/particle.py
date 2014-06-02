@@ -36,13 +36,25 @@ class ActiveParticle(object):
     """
     Particle class.
     """
-    def __init__(self, hash_particle, location: m_vec, fluid, radius, speed=m_vec.Vector([0, 0, 0]),
+    def __init__(self, hash_particle, location, fluid, radius, speed=m_vec.Vector([0, 0, 0]),
                  acceleration=m_vec.Vector([0, 0, 0]), rad_mul=RAD_MUL):
         """
-        :type location: point.Point
-        :type radius: float
+
+            :param hash_particle: acceleration structure of te particle
+            :param location: location of the particle
+            :param fluid: fluid of the particle
+            :param radius: parameter h
+            :param speed: speed
+            :param acceleration: acceleration
+            :param rad_mul: multiplier factor
+            :type hash_particle: m_hash.Hash (hash_particle)
+            :type location: point.Point (vector)
+            :type radius: float
+            :type rad_mul: float
+            :type fluid: fluid
+            :type speed: vector (m_vec)
+            :type: acceleration: vector
         """
-        # Structure
         assert isinstance(hash_particle, m_hash.Hash)
         self.__hash_particle = hash_particle
 
@@ -406,6 +418,14 @@ class Force(State):
 
 class ForcePressure(Force):
     def factor(self, particle, n):
+        """
+            :param particle: compute the pressure force of this particle
+            :param n: neighbours of the particle
+            :type particle: particle
+            :type n: particle
+            :return: pressure force
+            :rtype: float
+        """
         assert isinstance(particle, ActiveParticle)
         assert isinstance(n, ActiveParticle)
 
@@ -419,6 +439,14 @@ class ForcePressure(Force):
 
 class ForceViscosity(Force):
     def factor(self, particle, n):
+        """
+            :param particle: compute the viscosity force of this particle
+            :param n: neighbours of the particle
+            :type particle: particle
+            :type n: particle
+            :return: viscosity force
+            :rtype: float
+        """
         assert isinstance(particle, ActiveParticle)
         assert isinstance(n, ActiveParticle)
 
@@ -432,6 +460,14 @@ class ForceViscosity(Force):
 
 class ForceGravity(Force):
     def __call__(self, particle, n):
+        """
+            :param particle: compute the gravity force of this particle
+            :param n: neighbours of the particle
+            :type particle: particle
+            :type n: particle
+            :return: gravity force
+            :rtype: float
+        """
         assert isinstance(particle, ActiveParticle)
         assert isinstance(n, ActiveParticle)
         g = GRAVITY
