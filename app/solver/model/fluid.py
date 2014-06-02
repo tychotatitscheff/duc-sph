@@ -26,6 +26,23 @@ class Fluid(object):
     This class represent one kind of fluid.
     """
     def __init__(self, rho0, b, mu, sigma, l, k, cr):
+        """
+
+        :param rho0: density
+        :param b: buoyancy diffusion
+        :param mu: viscosity coefficient
+        :param sigma: surface tension
+        :param l: Threshold for normal computation in surface tension computation
+        :param k: Gas stiffness
+        :param cr: parameter of the collision
+        :type rho0: float
+        :type b: float
+        :type mu: float
+        :type sigma: float
+        :type l: float
+        :type k: float
+        :type cr: float
+        """
         self.__rho0 = rho0  # Rest density
         self.__b = b  # Buoyancy diffusion
         self.__mu = mu  # Viscosity

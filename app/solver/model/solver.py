@@ -37,6 +37,13 @@ GROUP_BY_LOW = 12
 
 class SphSolver():
     def __init__(self, tt, dt):
+        """
+
+        :param tt: times
+        :param dt: interval
+        :type tt: float
+        :type dt: float
+        """
         self.__tt = tt
         self.__t = 0
         self.__dt = dt
@@ -74,6 +81,15 @@ class SphSolver():
         self.__initialized = val
 
     def create_active_particle(self, location, radius, fluid):
+        """
+
+        :param location: location of the particle
+        :param radius: h
+        :param fluid: type of the particle
+        :type location: vector (m_vec)
+        :type radius: float
+        :type fluid: fluid
+        """
         m_part.ActiveParticle(self.particles, location, radius, fluid)
 
     def initialisation(self, l, n):
