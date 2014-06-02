@@ -58,6 +58,9 @@ class TestDefaultKernel:
         with pytest.raises(AssertionError):
             k1.gradient(3)
 
+    def test_gradient_shall_return_float_0(self):
+        assert isinstance(k1.gradient(s_v.Vector([0, 0, 0])), s_v.Vector)
+
     def test_gradient_shall_return_float_1(self):
         assert isinstance(k1.gradient(s_v.Vector([1, 2, 3])), s_v.Vector)
 
@@ -118,6 +121,9 @@ class TestSpikyKernel:
         with pytest.raises(AssertionError):
             k2.gradient(3)
 
+    def test_gradient_shall_return_float_0(self):
+        assert isinstance(k2.gradient(s_v.Vector([0, 0, 0])), s_v.Vector)
+
     def test_gradient_shall_return_float_1(self):
         assert isinstance(k2.gradient(s_v.Vector([1, 2, 3])), s_v.Vector)
 
@@ -177,6 +183,9 @@ class TestViscosityKernel:
     def test_gradient_raise_attribute_error_2(self):
         with pytest.raises(AssertionError):
             k2.gradient(3)
+
+    def test_gradient_shall_return_float_0(self):
+        assert isinstance(k3.gradient(s_v.Vector([0, 0, 0])), s_v.Vector)
 
     def test_gradient_shall_return_float_1(self):
         assert isinstance(k3.gradient(s_v.Vector([1, 2, 3])), s_v.Vector)

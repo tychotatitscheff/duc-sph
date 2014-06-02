@@ -23,42 +23,17 @@ import app.solver.model.hash_table as m_hash
 import app.solver.model.vector as m_vec
 import app.solver.model.kernel as m_kern
 import app.solver.model.solver as m_solver
-import app.solver.model.particle as m_part
 import random
 import pytest
 
-
-def create_part_fluid():
-    fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
-
-    solve = m_solver.SphSolver(10, 0.1)
-    vec = m_vec.Vector([random.randint(0, 1000), random.randint(0, 1000), random.randint(0, 1000)])
-    solve.initialisation(2, 100)
-    solve.create_active_particle(vec, fl, 0.001)
-    for key, value in solve.particles.hash_table.items():
-        for part in value:
-            assert isinstance(part, m_part.ActiveParticle)
-            print(part.density.value, part.current_location.value)
+hashing = m_hash.Hash(2, 2001)
+solve = m_solver.SphSolver(10, 0.1, hashing)
+fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
+random_vec = lambda: m_vec.Vector([random.randint(0, 1000), random.randint(0, 1000), random.randint(0, 1000)])
+list_vec = [random_vec() for i in range(0, 1000)]
+for vec in list_vec:
+    solve.create_active_particle(vec, fl, 1.)
+solve.run()
+print("")
 
 
-class TestCreatePart:
-
-    def test_call_raise_attribute_error_0(self):
-        with pytest.raises(TypeError):
-            create_part_fluid()
-
-
-
-
-'''
-kern = m_kern.SpikyKernel(10)
-V = ForcePressure("sals", kern, m_vec.Vector([1, 0, 2]))
-
-pt1 = m_vec.Vector([100, 200, 300])
-pt2 = m_vec.Vector([102, 201, 300])
-
-hashing = m_hash.Hash(1, 1000)
-A = m_part.ActiveParticule(hashing, pt1, 1, fl)
-B = m_part.ActiveParticule(hashing, pt2, 1, fl)
-t = SurfaceTension("Tension de surface", kern, m_vec.Vector([0, 0, 0]))
-print(t(A, A.neighbour(5, True)))'''
