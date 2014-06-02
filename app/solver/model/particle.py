@@ -19,7 +19,6 @@ __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
 
-
 from math import *
 
 import app.solver.model.vector as m_vec
