@@ -33,7 +33,7 @@ from app.solver.conf import *
 
 
 class SphSolver():
-    def __init__(self, tt, dt, hashing, collisions_objects=[]):
+    def __init__(self, tt, dt, hashing, collisions_objects=None):
         """
 
         :param tt: total times
@@ -45,7 +45,7 @@ class SphSolver():
         self.__t = 0
         self.__dt = dt
         self.__particles = hashing
-        self.__collisions_objects = collisions_objects
+        self.__collisions_objects = [] if collisions_objects is None else collisions_objects
 
     @property
     def dt(self):

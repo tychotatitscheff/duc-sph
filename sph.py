@@ -59,10 +59,3 @@ if __name__ == "__main__":
         pickled_acc_structural = d_json.json_encode(acc_structural)
         d_mongo.create_document(pickled_acc_structural, state)
 
-    geometrie = ""  # come from gui
-    pickled_geometrie = json.json_encode(geometrie)
-    mongo.create_document(pickled_geometrie, project)
-    meta_data = ""  # come from gui²
-    pickled_meta_data = json.json_encode(meta_data)
-    mongo.create_document(pickled_meta_data, project)
-            # en cours de production
