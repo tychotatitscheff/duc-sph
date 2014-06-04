@@ -205,7 +205,7 @@ class PongGame:
         #print self.boundary[0]/2,self.ball.x()
         if self.ball.x()<-self.boundary[0]/2:
             #print 'missed left'
-            return True,'left'
+            return True, 'left'
         elif self.ball.x()>self.boundary[0]/2:
             #print 'missed right'
             return True,'right'

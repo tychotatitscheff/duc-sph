@@ -20,17 +20,15 @@ import pytest
 import app.solver.model.vector as m_vec
 import app.solver.model.fluid as m_fluid
 import app.solver.model.hash_table as m_hash
+import app.solver.model.particle as s_p
 
-import app.solver.model.particule as s_p
-
-# test de la classe ActiveParticule
+# test de la class ActiveParticle
 hash1 = m_hash.Hash(2, 100)
 fluid1 = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
 p1 = s_p.ActiveParticule(hash1, m_vec.Vector([1, 2, 3]), 6, fluid1)
 
 
 class TestActiveParticule:
-
     def test_fluid_raise_attribute_error_0(self):
         with pytest.raises(AssertionError):
             p1.fluid = "a"

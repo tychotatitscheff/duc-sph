@@ -25,17 +25,31 @@ import app.solver.model.kernel as m_kern
 import app.solver.model.solver as m_solver
 import random
 import pytest
+import app.solver.model.particle as m_part
 
+
+fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
+solve = m_solver.SphSolver(10, 0.1)
+solve.initialisation(2, 100)
 
 def create_part_fluid():
-    fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
 
-    solve = m_solver.SphSolver(10, 0.1)
     vec = m_vec.Vector([random.randint(0, 1000), random.randint(0, 1000), random.randint(0, 1000)])
-    solve.initialisation(2, 100)
+    print(vec)
+
     solve.create_active_particle(vec, fl, 0.001)
-    print(solve.particles)
+    for key, value in solve.particles.hash_table.items():
+        for part in value:
+            assert isinstance(part, m_part.ActiveParticle)
+            print(part.density.value, part.current_location.value)
+
 
 if __name__ == "__main__":
     create_part_fluid()
+
+    for key, value in solve.particles.hash_table.items():
+        for part in value:
+            assert isinstance(part, m_part.ActiveParticle)
+            print(part.density.value, part.current_location.value)
     pass
+print("yy")
