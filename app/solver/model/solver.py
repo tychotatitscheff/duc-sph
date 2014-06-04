@@ -178,19 +178,27 @@ class SphSolver():
             # assert isinstance(c, m_vec.Vector)
             s = kwargs['size']
             assert isinstance(s, float)
-            partlist = []
+            partlist = [m_vec.Vector([0, 0, 0])]
             dim1 = 0
             dim2 = 0
             dim3 = 0
+            b1 = False
+            b2 = False
+            b3 = False
             while dim1 < s:
-                if :
-                    partlist.append([dim1, r, r])
+                for element in partlist:
+                    if (m_vec.Vector([dim1, r, r]) - element).norm() = 0:
+                        b1 = True
+                if b1 is False:
+                    partlist.append(m_vec.Vector([dim1, r, r]))
                 while dim2 < s:
-                    if [r, dim2, r] in partlist is False:
-                        partlist.append([r, dim2, r])
+                    for element in partlist:
+                        if m_vec.Vector([r, dim2, r]) - element != [0, 0, 0]:
+                            partlist.append(m_vec.Vector([r, dim2, r]))
                     while dim3 < s:
-                        if [r, r, dim3] in partlist is False:
-                            partlist.append([r, r, dim3])
+                        for element in partlist:
+                            if m_vec.Vector([r, r, dim3]) - element != [0, 0, 0]:
+                                partlist.append(m_vec.Vector([r, r, dim3]))
                         dim3 += 1
                         if dim3 > s:
                             break
