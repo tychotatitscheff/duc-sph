@@ -110,6 +110,7 @@ class SphSolver():
         if gravity:
             f_g = m_part.ForceGravity("Gravity force of " + h, k_d, m_vec.Vector([0, 0, -9.8]))
             act_part.append_force(f_g, internal=False)
+        return act_part
 
     def run(self):
         # Initialize the system if not
@@ -196,12 +197,27 @@ class SphSolver():
             # assert isinstance(c, m_vec.Vector)
             s = kwargs['size']
             assert isinstance(s, float)
-            partlist = []
-            for dim1 in np.arange(1, int(s + 1), 2 * math.sqrt(2) * r):
-                for dim2 in np.arange(1, int(s + 1), 2 * math.sqrt(2) * r):
-                    for dim3 in np.arange(1, int(s + 1), 2 * math.sqrt(2) * r):
-                        partlist.append(m_vec.Vector([r * dim1, r * dim2, r * dim3]))
-            return partlist
+            part_list = []
+            for dim1 in np.arange(1, int(s), 2 * math.sqrt(2) * r):
+                for dim2 in np.arange(1, int(s), 2 * math.sqrt(2) * r):
+                    for dim3 in np.arange(1, int(s), 2 * math.sqrt(2) * r):
+                        part_list.append(m_vec.Vector([r * dim1, r * dim2, r * dim3]))
+            for element in part_list:
+                self.create_active_particle(element, m_flu.Fluid, particle.radius)
+
+    def generative_surface(self, length, width, normal, particle, speed):
+        assert isinstance(normal, m_vec.Vector)
+        assert isinstance(particle, m_part.ActiveParticle)
+        assert isinstance(speed, m_vec.Vector)
+        r = particle.radius
+        part_list = []
+        for dim1 in np.arange(1, int(length), 2 * math.sqrt(2) * r):
+            for dim2 in np.arange(1, int(width), 2 * math.sqrt(2) * r):
+                part_list.append(m_vec.Vector([dim1, dim2, 0]))
+        for element in part_list:
+            p = self.create_active_particle(element, m_flu.Fluid, particle.radius)
+            p.current_speed(speed)
+
 
 if __name__ == "__main__":
     A = SphSolver(100, 1, 0.1)
