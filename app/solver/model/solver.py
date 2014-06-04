@@ -21,6 +21,7 @@ __status__ = "Production"
 import concurrent.futures
 
 import math
+import numpy as np
 
 import app.solver.helper.grouper as h_group
 import app.solver.model.particle as m_part
@@ -28,6 +29,7 @@ import app.solver.model.collision as m_col
 
 import app.solver.model.kernel as m_kern
 import app.solver.model.hash_table as m_hash
+
 import app.solver.model.vector as m_vec
 
 from app.solver.conf import *
@@ -112,6 +114,7 @@ class SphSolver():
     def run(self):
         # Initialize the system if not
         while self.__t < self.__tt:
+            print(self.__t)
             # Compute density and pressure
             self.__compute_density_and_pressure()
             # Compute forces and integrate
@@ -193,42 +196,17 @@ class SphSolver():
             # assert isinstance(c, m_vec.Vector)
             s = kwargs['size']
             assert isinstance(s, float)
-            partlist = [m_vec.Vector([0, 0, 0])]
-            dim1 = 0
-            dim2 = 0
-            dim3 = 0
-            b1 = False
-            b2 = False
-            b3 = False
-            while dim1 < s:
-                for element in partlist:
-                    if (m_vec.Vector([dim1, r, r]) - element).norm() = 0:
-                        b1 = True
-                if b1 is False:
-                    partlist.append(m_vec.Vector([dim1, r, r]))
-                while dim2 < s:
-                    for element in partlist:
-                        if m_vec.Vector([r, dim2, r]) - element != [0, 0, 0]:
-                            partlist.append(m_vec.Vector([r, dim2, r]))
-                    while dim3 < s:
-                        for element in partlist:
-                            if m_vec.Vector([r, r, dim3]) - element != [0, 0, 0]:
-                                partlist.append(m_vec.Vector([r, r, dim3]))
-                        dim3 += 1
-                        if dim3 > s:
-                            break
-                    dim2 += 1
-                    if dim2 > s:
-                        break
-                dim1 += 1
-                if dim1 > s:
-                    break
+            partlist = []
+            for dim1 in np.arange(1, int(s + 1), 2 * math.sqrt(2) * r):
+                for dim2 in np.arange(1, int(s + 1), 2 * math.sqrt(2) * r):
+                    for dim3 in np.arange(1, int(s + 1), 2 * math.sqrt(2) * r):
+                        partlist.append(m_vec.Vector([r * dim1, r * dim2, r * dim3]))
             return partlist
 
 if __name__ == "__main__":
-    A = SphSolver(100, 1)
+    A = SphSolver(100, 1, 0.1)
     H = m_hash.Hash(2, 2000)
     import app.solver.model.fluid as m_flu
     flu = m_flu.Fluid(1000, 1, 0.05, 0.00005, 1, 10, 2)
     part1 = m_part.ActiveParticle(H, m_vec.Vector([0, 0, 0]), flu, 1)
-    print(A.initial_volume("non oriented cube", part1, size=4.))
+    print(A.initial_volume("non oriented cube", part1, size=20.))
