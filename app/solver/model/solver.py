@@ -97,14 +97,15 @@ class SphSolver():
             f_p = m_part.ForcePressure("Pressure force of " + h, k_d, vec_null)
             f_v = m_part.ForceViscosity("Viscosity force of " + h, k_v, vec_null)
 
-            f_s = m_part.ForceSurfaceTension("Surface tension force of " + h, k_d, vec_null)
-
             act_part.density = d
             act_part.pressure = p
 
             act_part.append_force(f_p)
             act_part.append_force(f_v)
-            act_part.append_force(f_s)
+
+            if fluid_type == "liquid":
+                f_s = m_part.ForceSurfaceTension("Surface tension force of " + h, k_d, vec_null)
+                act_part.append_force(f_s, internal=False)
 
         if gravity:
             f_g = m_part.ForceGravity("Gravity force of " + h, k_d, m_vec.Vector([0, 0, -9.8]))
@@ -153,12 +154,12 @@ class SphSolver():
                             force.__call__(particle, neigh)
                             particle.resultant_force += force.value
                         particle.future_acceleration.value = particle.resultant_force * 1. / particle.mass
-                        particle.future_speed = particle.current_speed.value + particle.future_acceleration.value * self.dt
-                        particle.future_location = particle.current_location.value + particle.future_speed.value * self.dt
+                        particle.future_speed.value = particle.current_speed.value + particle.future_acceleration.value * self.dt
+                        particle.future_location.value = particle.current_location.value + particle.future_speed.value * self.dt
                     except Exception as e:
                         print("Force computations and integration : " + str(e))
-            hashing = self.particles.hash_table.values()
-            try_compute_forces_and_integrate(hashing)
+        hashing = self.particles.hash_table.values()
+        try_compute_forces_and_integrate(hashing)
 
     def __check_for_collision(self):
         def try_check_for_collision(structure):
@@ -188,26 +189,38 @@ class SphSolver():
         hashing = self.particles.hash_table.values()
         try_update(hashing)
 
-    def initial_volume(self, primitive, particle, **kwargs):
+    def initial_volume(self, particle, primitive="non oriented cube", distribution="CFC", **kwargs):
         assert isinstance(particle, m_part.ActiveParticle)
         r = particle.radius
         part_list = []
         if primitive == "non oriented cube":
-            # c = kwargs['centre']
-            # assert isinstance(c, m_vec.Vector)
-            s = kwargs['size']
-            dec = False
-            for z in np.arange(r, s - r, 2 / math.sqrt(3) * r):
-                if dec:
-                    a = 2 / math.sqrt(3) * r
-                else:
-                    a = 0
-                for x in np.arange(a + r, s - r, 4 / math.sqrt(3) * r):
-                    for y in np.arange(a + r, s - r, 4 / math.sqrt(3) * r):
-                        part_list.append(m_vec.Vector([r * x, r * y, r * z]))
-                dec = not dec
+            if distribution == "CC":
+                s = kwargs['size']
+                dec = False
+                for z in np.arange(r, s - r, 2 / math.sqrt(3) * r):
+                    if dec:
+                        a = 2 / math.sqrt(3) * r
+                    else:
+                        a = 0
+                    for x in np.arange(a + r, s - r, 4 / math.sqrt(3) * r):
+                        for y in np.arange(a + r, s - r, 4 / math.sqrt(3) * r):
+                            part_list.append(m_vec.Vector([r * x, r * y, r * z]))
+                    dec = not dec
+            if distribution == "CFC":
+                s = kwargs['size']
+                dec = False
+                for z in np.arange(r, s - r, 2 / math.sqrt(3) * r):
+                    if dec:
+                        a = 2 / math.sqrt(3) * r
+                    else:
+                        a = 0
+                    for x in np.arange(a + r, s - r, 4 / math.sqrt(3) * r):
+                        for y in np.arange(a + r, s - r, 4 / math.sqrt(3) * r):
+                            part_list.append(m_vec.Vector([r * x, r * y, r * z]))
+                    dec = not dec
         for element in part_list:
             self.create_active_particle(element, particle.fluid, particle.radius)
+        particle.__del__()
         return part_list
 
     def generative_surface(self, length, width, normal, particle, speed):

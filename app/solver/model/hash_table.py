@@ -104,9 +104,9 @@ class Hash():
         p2 = self.__p2
         p3 = self.__p3
 
-        ap = int(r_chap[0]*p1)
-        bp = int(r_chap[1]*p2)
-        cp = int(r_chap[2]*p3)
+        ap = int(r_chap[0] * p1)
+        bp = int(r_chap[1] * p2)
+        cp = int(r_chap[2] * p3)
 
         __hash = (ap ^ bp ^ cp) % n_h
 

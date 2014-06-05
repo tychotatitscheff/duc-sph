@@ -98,6 +98,9 @@ class ActiveParticle(object):
             pass
         del self
 
+    def __repr__(self):
+        return " Particle : (" + repr(self.current_location.value) + ")"
+
     ### Acceleration structure
 
     @property
@@ -135,7 +138,7 @@ class ActiveParticle(object):
 
     @property
     def mass(self):
-        return 4/3 * pi * (self.radius ** 3) * self.fluid.rho0
+        return 4 / 3 * pi * (self.radius ** 3) * self.fluid.rho0
 
     @mass.setter
     def mass(self, mass):
@@ -167,6 +170,7 @@ class ActiveParticle(object):
 
     @current_location.setter
     def current_location(self, loc):
+        assert isinstance(loc, Position)
         self.__current_location = loc
 
     @property
@@ -175,6 +179,7 @@ class ActiveParticle(object):
 
     @future_location.setter
     def future_location(self, loc):
+        assert isinstance(loc, Position)
         self.__future_location = loc
 
     ### Speed
@@ -185,6 +190,7 @@ class ActiveParticle(object):
 
     @current_speed.setter
     def current_speed(self, sp):
+        assert isinstance(sp, Speed)
         self.__current_speed = sp
 
     @property
@@ -193,6 +199,7 @@ class ActiveParticle(object):
 
     @future_speed.setter
     def future_speed(self, sp):
+        assert isinstance(sp, Speed)
         self.__future_speed = sp
 
     ### Acceleration
@@ -203,6 +210,7 @@ class ActiveParticle(object):
 
     @current_acceleration.setter
     def current_acceleration(self, acc):
+        assert isinstance(acc, Acceleration)
         self.__current_acceleration = acc
 
     @property
@@ -211,6 +219,7 @@ class ActiveParticle(object):
 
     @future_acceleration.setter
     def future_acceleration(self, acc):
+        assert isinstance(acc, Acceleration)
         self.__future_acceleration = acc
 
     ### Forces
@@ -289,6 +298,9 @@ class State(object):
     def name(self, name):
         self.__name = name
 
+    def __repr__(self):
+        return str(self.__class__.__name__) + " : " + repr(self.value)
+
 
 class Density(State):
     def __init__(self, name, kernel: m_kern.Kernel, val):
@@ -319,9 +331,10 @@ class ColourField(State):
     M. Müller, D. Charypar, and M. Gross. “Particle-Based Fluid Simulation for Interactive Applications”.
     Proceedings of 2003 ACM SIGGRAPH Symposium on Computer Animation, pp. 154-159, 2003.
     """
-    def __init__(self, name, kernel: m_kern.Kernel, val):
+    def __init__(self, name, kern, val):
         super().__init__(name, val)
-        self.__kernel = kernel
+        assert isinstance(kern, m_kern.Kernel)
+        self.__kernel = kern
 
     @staticmethod
     def factor(neighbour):
@@ -332,17 +345,20 @@ class ColourField(State):
         for n in neighbour:
             r = particle.current_location.value - n.current_location.value
             colour += self.factor(n) * self.__kernel.__call__(r)
+        return colour
 
     def laplacian(self, particle, neighbour):
         colour = 0
         for n in neighbour:
             r = particle.current_location.value - n.current_location.value
             colour += self.factor(n) * self.__kernel.laplacian(r)
+        return colour
 
 
 class DirectionSurfaceTension(State):
     def __init__(self, name, kern: m_kern.Kernel, val):
         super().__init__(name, val)
+        assert isinstance(kern, m_kern.Kernel)
         self.__kernel = kern
 
     @staticmethod
@@ -354,29 +370,14 @@ class DirectionSurfaceTension(State):
         for neigh in neighbour:
             r = particle.current_location.value - neigh.current_location.value
             n += self.factor(neigh) * self.__kernel.__call__(r)
+        return n
 
     def gradient(self, particle, neighbour):
         n = m_vec.Vector([0, 0, 0])
         for neigh in neighbour:
             r = particle.current_location.value - neigh.current_location.value
             n += self.factor(neigh) * self.__kernel.gradient(r)
-
-
-class ForceSurfaceTension(State):
-    def __init__(self, name, kern: m_kern.Kernel, val):
-        super().__init__(name, val)
-        self.__kernel = kern
-
-    def __call__(self, part, neighbour):
-        assert isinstance(part, ActiveParticle)
-        force = m_vec.Vector([0, 0, 0])
-        cf = ColourField("CF", m_kern.Kernel, 0)
-        std = DirectionSurfaceTension("STD", m_kern.Kernel, 0)
-        if std.gradient(part, neighbour) >= part.fluid.l:  # Only compute surface tension when close to the surface
-            for n in neighbour:
-                force = - part.fluid.sigma * cf.laplacian(part, n) * std.gradient(part, n) / \
-                    std.gradient(part, n).m_vec.Vector.norm(n)
-        return force
+        return n
 
 
 class Pressure(State):
@@ -395,14 +396,16 @@ class Pressure(State):
 
 
 class Force(State):
-    def __init__(self, name, kernel: m_kern.Kernel, val, kern_type="gradient", self_include=False):
+    def __init__(self, name, kernel: m_kern.Kernel, val):
         assert isinstance(val, m_vec.Vector)
         assert isinstance(kernel, m_kern.Kernel)
         super().__init__(name, val)
         self.__kernel = kernel
-        self.__kernel_type = kern_type
         self.__unit = "N"
-        self.__self_include = self_include
+
+    @property
+    def kernel(self):
+        return self.__kernel
 
     def factor(self, particle, n):
         raise NotImplementedError
@@ -411,16 +414,10 @@ class Force(State):
         assert isinstance(particle, ActiveParticle)
         assert isinstance(neighbour, list)
         resultant = m_vec.Vector([0, 0, 0])
-        k_type = self.__kernel_type
-        if k_type == "gradient":
-            w = self.__kernel.gradient
-        elif k_type == "laplacian":
-            w = self.__kernel.laplacian
-        else:
-            w = self.__kernel.__call__
+        w = self.kernel.gradient
         for n in neighbour:
             assert isinstance(n, ActiveParticle)
-            if self.__self_include or not n != particle:
+            if not n is particle:
                 r = particle.current_location.value - n.current_location.value
                 f = self.factor(particle, n)
                 ker = w(r)
@@ -438,9 +435,6 @@ class ForcePressure(Force):
             :return: pressure force
             :rtype: float
         """
-        assert isinstance(particle, ActiveParticle)
-        assert isinstance(n, ActiveParticle)
-
         mj = n.mass
         rho_j = n.density.value
         rho_i = particle.density.value
@@ -450,6 +444,9 @@ class ForcePressure(Force):
 
 
 class ForceViscosity(Force):
+    def __init__(self, name, kernel: m_kern.Kernel, val):
+        super().__init__(name, kernel, val)
+
     def factor(self, particle, n):
         """
             :param particle: compute the viscosity force of this particle
@@ -473,18 +470,30 @@ class ForceViscosity(Force):
         assert isinstance(particle, ActiveParticle)
         assert isinstance(neighbour, list)
         resultant = m_vec.Vector([0, 0, 0])
-        k_type = self.__kernel_type
-        if k_type == "gradient":
-            w = self.__kernel.gradient
-        elif k_type == "laplacian":
-            w = self.__kernel.laplacian
-        else:
-            w = self.__kernel.__call__
+        w = self.kernel.laplacian
         for n in neighbour:
             assert isinstance(n, ActiveParticle)
-            r = particle.current_location.value - n.current_location.value
-            resultant += self.factor(particle, n) * w(r)
+            if not n is particle:
+                r = particle.current_location.value - n.current_location.value
+                f = self.factor(particle, n)
+                assert isinstance(f, m_vec.Vector)
+                wr = w(r)
+                assert isinstance(wr, float) or isinstance(wr, int)
+                resultant += f * wr
         return resultant
+
+
+class ForceSurfaceTension(Force):
+    def __call__(self, part, neighbour):
+        assert isinstance(part, ActiveParticle)
+        force = m_vec.Vector([0, 0, 0])
+        cf = ColourField("CF", self.kernel, 0)
+        std = DirectionSurfaceTension("STD", self.kernel, 0)
+        if std.gradient(part, neighbour).norm() >= part.fluid.l:  # Only compute surface tension when close to the surface
+            for n in neighbour:
+                force = - part.fluid.sigma * cf.laplacian(part, n) * std.gradient(part, n) / \
+                    std.gradient(part, n).m_vec.Vector.norm(n)
+        return force
 
 
 class ForceGravity(Force):
@@ -493,12 +502,11 @@ class ForceGravity(Force):
             :param particle: compute the gravity force of this particle
             :param n: neighbours of the particle
             :type particle: particle
-            :type n: particle
+            :type n: list
             :return: gravity force
             :rtype: float
         """
         assert isinstance(particle, ActiveParticle)
-        assert isinstance(n, ActiveParticle)
         g = GRAVITY
         rho_i = particle.rho
         return rho_i * g

@@ -32,6 +32,7 @@ import math
 
 import numpy
 
+numpy.set_printoptions(precision=2)
 
 _TINY = 1e-15
 
@@ -46,7 +47,7 @@ def _xyz_to_012(c):
 def _args_to_tuple(name, args):
     n_arg = len(args)
     if n_arg == 0:
-        data = 3*(0,)
+        data = 3 * (0,)
     elif n_arg == 1:
         data = args[0]
         if len(data) != 3:
@@ -77,7 +78,9 @@ class Vector(numpy.ndarray):
         return numpy.ndarray.__new__(cls, shape=(3,), buffer=arr)
 
     def __repr__(self):
-        return 'vec3' + repr(tuple(self))
+        decimal = 5
+        return "v[" + str(round(self[0], decimal)) + ", " +\
+               str(round(self[0], decimal)) + ", " + str(round(self[0], decimal)) + "]"
 
     def __mul__(self, other):
         return numpy.dot(self, other)
@@ -112,7 +115,7 @@ class Vector(numpy.ndarray):
             theta = phi = 0.0
         else:
             x, y, z = self
-            theta = math.acos(z/r)
+            theta = math.acos(z / r)
             phi = math.atan2(y, x)
 
         return r, theta, phi
@@ -125,7 +128,7 @@ class Vector(numpy.ndarray):
 
     def get_cylindrical(self):
         x, y, z = self
-        rho = math.sqrt(x*x + y*y)
+        rho = math.sqrt(x * x + y * y)
         phi = math.atan2(y, x)
         return rho, phi, z
 

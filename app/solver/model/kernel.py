@@ -69,7 +69,7 @@ class Poly6Kernel(Kernel):
         assert isinstance(r, m_vec.Vector)
         h = self.h
         if r.norm() <= h:
-            return 945 / (8 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) * (r.norm() **2 - 0.75 * (h ** 2 - r.norm() ** 2))
+            return 945 / (8 * pi * h ** 9) * (h ** 2 - r.norm() ** 2) * (r.norm() ** 2 - 0.75 * (h ** 2 - r.norm() ** 2))
         else:
             return 0.
 
