@@ -67,7 +67,7 @@ class ActiveParticle(object):
 
         # Density and pressure
         self.__density = Density("rho of " + str(self.__hash__()),
-                                 m_kern.DefaultKernel(rad_mul * radius), fluid.rho0)
+                                 m_kern.Poly6Kernel(rad_mul * radius), fluid.rho0)
         self.__pressure = Pressure("P of " + str(self.__hash__()), ATMOSPHERIC_PRESSURE)
 
         # Forces

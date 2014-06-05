@@ -58,7 +58,6 @@ class SphSolver():
     def dt(self, t):
         self.__dt = t
 
-
     @property
     def tt(self):
         return self.__tt
@@ -86,7 +85,7 @@ class SphSolver():
         h = str(hash(act_part))
         vec_null = m_vec.Vector([0, 0, 0])
 
-        k_d = m_kern.DefaultKernel(radius * 3)
+        k_d = m_kern.Poly6Kernel(radius * 3)
         k_v = m_kern.ViscosityKernel(radius * 3)
         k_s = m_kern.SpikyKernel(radius * 3)
 
@@ -192,18 +191,24 @@ class SphSolver():
     def initial_volume(self, primitive, particle, **kwargs):
         assert isinstance(particle, m_part.ActiveParticle)
         r = particle.radius
+        part_list = []
         if primitive == "non oriented cube":
             # c = kwargs['centre']
             # assert isinstance(c, m_vec.Vector)
             s = kwargs['size']
-            assert isinstance(s, float)
-            part_list = []
-            for dim1 in np.arange(1, int(s), 2 * math.sqrt(2) * r):
-                for dim2 in np.arange(1, int(s), 2 * math.sqrt(2) * r):
-                    for dim3 in np.arange(1, int(s), 2 * math.sqrt(2) * r):
-                        part_list.append(m_vec.Vector([r * dim1, r * dim2, r * dim3]))
-            for element in part_list:
-                self.create_active_particle(element, m_flu.Fluid, particle.radius)
+            dec = False
+            for z in np.arange(r, s - r, 2 / math.sqrt(3) * r):
+                if dec:
+                    a = 2 / math.sqrt(3) * r
+                else:
+                    a = 0
+                for x in np.arange(a + r, s - r, 4 / math.sqrt(3) * r):
+                    for y in np.arange(a + r, s - r, 4 / math.sqrt(3) * r):
+                        part_list.append(m_vec.Vector([r * x, r * y, r * z]))
+                dec = not dec
+        for element in part_list:
+            self.create_active_particle(element, particle.fluid, particle.radius)
+        return part_list
 
     def generative_surface(self, length, width, normal, particle, speed):
         assert isinstance(normal, m_vec.Vector)
