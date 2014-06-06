@@ -5,7 +5,6 @@ import qdarkstyle
 from PyQt4 import QtGui, QtCore
 
 import app.gui.widgets.glViewer as g_gl
-import app.gui.widgets.nodeEditor as g_ne
 
 
 class Window(QtGui.QMainWindow):
@@ -30,7 +29,7 @@ class Window(QtGui.QMainWindow):
         self.gl_widget = g_gl.GLWidget()
         self.splitter_v.addWidget(self.gl_widget)
 
-        self.node_editor = g_ne.NodeEditor()
+        self.node_editor = QtGui.QFrame()
         self.splitter_v.addWidget(self.node_editor)
 
         self.splitter_h = QtGui.QSplitter(QtCore.Qt.Horizontal)
