@@ -3,8 +3,9 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import QtOpenGL
 from OpenGL import GLU
-from OpenGL.GL import *
+import OpenGL.GL as GL
 import numpy as np
+from numpy import array
 
 
 class GLWidget(QtOpenGL.QGLWidget):
@@ -14,37 +15,38 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.y_rot_deg = 0.0
         self.vertices = np.array([[]])
         self.faces = np.array([])
+        self.initializeGL()
 
     def initializeGL(self):
         self.qglClearColor(QtGui.QColor(0, 0, 150))
         self.add_sphere(np.array([0, 0, 0]), 1)
 
-        glEnable(GL_DEPTH_TEST)
+        GL.glEnable(GL.GL_DEPTH_TEST)
 
     def resizeGL(self, width, height):
         if height == 0:
             height = 1
 
-        glViewport(0, 0, width, height)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
+        GL.glViewport(0, 0, width, height)
+        GL.glMatrixMode(GL.GL_PROJECTION)
+        GL.glLoadIdentity()
         aspect = width / float(height)
 
         GLU.gluPerspective(45.0, aspect, 1.0, 100.0)
-        glMatrixMode(GL_MODELVIEW)
+        GL.glMatrixMode(GL.GL_MODELVIEW)
 
     def paintGL(self):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
-        glLoadIdentity()
-        glTranslate(0.0, 0.0, -50.0)
-        glScale(20.0, 20.0, 20.0)
-        glRotate(self.y_rot_deg, 0.2, 1.0, 0.3)
-        glTranslate(-0.5, -0.5, -0.5)
+        GL.glLoadIdentity()
+        GL.glTranslate(0.0, 0.0, -50.0)
+        GL.glScale(20.0, 20.0, 20.0)
+        GL.glRotate(self.y_rot_deg, 0.2, 1.0, 0.3)
+        GL.glTranslate(-0.5, -0.5, -0.5)
 
-        glEnableClientState(GL_VERTEX_ARRAY)
-        glVertexPointerf(self.vertices)
-        glDrawElementsui(GL_TRIANGLES, self.faces)
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glVertexPointerf(self.vertices)
+        GL.glDrawElementsui(GL.GL_TRIANGLES, self.faces)
 
     def add_sphere(self, position, radius):
         vertices = np.array(
@@ -73,12 +75,11 @@ class GLWidget(QtOpenGL.QGLWidget):
              31, 22, 32, 22, 5, 32, 26, 33, 7, 26, 23, 33, 23, 11, 33, 28, 34, 8, 28, 25, 34, 25, 7, 34,
              30, 35, 9, 30, 27, 35, 27, 8, 35, 32, 36, 10, 32, 29, 36, 29, 9, 36, 24, 37, 11, 24, 31, 37,
              31, 10, 37, 38, 39, 12, 38, 33, 39, 33, 11, 39, 40, 38, 12, 40, 34, 38, 34, 7, 38, 41, 40, 12,
-             41, 35, 40, 35, 8, 40, 42, 41, 12, 42, 36, 41, 36, 9, 41, 39, 42, 12, 39, 37, 42, 37, 10, 42])
+             41, 35, 40, 35, 8, 40, 42, 41, 12, 42, 36, 41, 36, 9, 41, 39, 42, 12, 39, 37, 42, 37, 10, 42]) - 1
 
         self.vertices = np.append(self.vertices, vertices * radius + position)
         if np.alen(self.faces) > 0:
             self.faces = np.append(self.faces, faces + np.amax(self.faces))
-
         else:
             print(faces)
             self.faces = faces
@@ -96,28 +97,27 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(300, 300)
         self.setWindowTitle('GL Cube Test')
 
-        self.initActions()
-        self.initMenus()
+        self.init_actions()
+        self.init_menus()
 
-        glWidget = GLWidget(self)
-        self.setCentralWidget(glWidget)
+        gl_widget = GLWidget(self)
+        self.setCentralWidget(gl_widget)
 
         timer = QtCore.QTimer(self)
         timer.setInterval(20)
-        QtCore.QObject.connect(timer, QtCore.SIGNAL('timeout()'), glWidget.spin)
+        QtCore.QObject.connect(timer, QtCore.SIGNAL('timeout()'), gl_widget.spin)
         timer.start()
 
+    def init_actions(self):
+        self.exit_action = QtGui.QAction('Quit', self)
+        self.exit_action.setShortcut('Ctrl+Q')
+        self.exit_action.setStatusTip('Exit application')
+        self.connect(self.exit_action, QtCore.SIGNAL('triggered()'), self.close)
 
-    def initActions(self):
-        self.exitAction = QtGui.QAction('Quit', self)
-        self.exitAction.setShortcut('Ctrl+Q')
-        self.exitAction.setStatusTip('Exit application')
-        self.connect(self.exitAction, QtCore.SIGNAL('triggered()'), self.close)
-
-    def initMenus(self):
-        menuBar = self.menuBar()
-        fileMenu = menuBar.addMenu('&File')
-        fileMenu.addAction(self.exitAction)
+    def init_menus(self):
+        menu_bar = self.menuBar()
+        file_menu = menu_bar.addMenu('&File')
+        file_menu.addAction(self.exit_action)
 
     def close(self):
         QtGui.qApp.quit()
