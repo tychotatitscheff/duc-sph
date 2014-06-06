@@ -298,8 +298,8 @@ class State(object):
     def name(self, name):
         self.__name = name
 
-    def __repr__(self):
-        return str(self.__class__.__name__) + " : " + repr(self.value)
+    # def __repr__(self):
+    #     return str(self.__class__.__name__) + " : " + repr(self.value)
 
 
 class Density(State):
@@ -422,6 +422,7 @@ class Force(State):
                 f = self.factor(particle, n)
                 ker = w(r)
                 resultant += f * ker
+        self.value = resultant
         return resultant
 
 
@@ -480,20 +481,26 @@ class ForceViscosity(Force):
                 wr = w(r)
                 assert isinstance(wr, float) or isinstance(wr, int)
                 resultant += f * wr
+        self.value = resultant
         return resultant
 
 
 class ForceSurfaceTension(Force):
     def __call__(self, part, neighbour):
         assert isinstance(part, ActiveParticle)
-        force = m_vec.Vector([0, 0, 0])
+        resultant = m_vec.Vector([0, 0, 0])
         cf = ColourField("CF", self.kernel, 0)
+        cf_val = cf.__call__(part, neighbour)
         std = DirectionSurfaceTension("STD", self.kernel, 0)
-        if std.gradient(part, neighbour).norm() >= part.fluid.l:  # Only compute surface tension when close to the surface
+        std_vec = std.__call__(part, neighbour)
+        std_grad = std.gradient(part, neighbour)
+        std_grad_norm = std.gradient(part, neighbour).norm()
+        if std_grad_norm >= part.fluid.l:  # Only compute surface tension when close to the surface
             for n in neighbour:
-                force = - part.fluid.sigma * cf.laplacian(part, n) * std.gradient(part, n) / \
+                resultant = - part.fluid.sigma * cf.laplacian(part, n) * std.gradient(part, n) / \
                     std.gradient(part, n).m_vec.Vector.norm(n)
-        return force
+        self.value = resultant
+        return resultant
 
 
 class ForceGravity(Force):
@@ -509,6 +516,7 @@ class ForceGravity(Force):
         assert isinstance(particle, ActiveParticle)
         g = GRAVITY
         rho_i = particle.rho
+        self.value = rho_i * g
         return rho_i * g
 
 

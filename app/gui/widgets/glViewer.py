@@ -5,7 +5,10 @@ import math
 
 from PyQt4 import QtCore, QtGui, QtOpenGL
 from OpenGL import GL
-
+from OpenGL.GL.shaders import *
+from OpenGL import GLU
+from OpenGL import GLUT
+GLUT.glutSolidSphere()
 
 class GLWidget(QtOpenGL.QGLWidget):
     GL_MULTISAMPLE = 0x809D
@@ -63,7 +66,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def initializeGL(self):
         self.qglClearColor(self.troll_tech_purple.darker())
-        self.object = self.make_object()
+        # self.object = self.make_object()
         GL.glShadeModel(GL.GL_FLAT)
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glEnable(GL.GL_CULL_FACE)
@@ -86,7 +89,8 @@ class GLWidget(QtOpenGL.QGLWidget):
         GL.glRotated(self.x_rot / 16.0, 1.0, 0.0, 0.0)
         GL.glRotated(self.y_rot / 16.0, 0.0, 1.0, 0.0)
         GL.glRotated(self.z_rot / 16.0, 0.0, 0.0, 1.0)
-        GL.glCallList(self.object)
+        # GL.glCallList(self.object)
+        GLUT.glutSolidSphere(1.0,32,32)
 
     def resizeGL(self, width, height):
         side = min(width, height)

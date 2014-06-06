@@ -142,6 +142,35 @@ class ViscosityKernel(Kernel):
             return 0.
 
 
+class M6QuinticKernel(Kernel):
+    """
+
+    """
+
+    def __call__(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        q = r.norm() / h
+        if 0 <= q <= 2./3:
+            val = -(5. * (2 - q) ** 4) - 30 * (((4. / 3) - q) ** 4)
+
+    def gradient(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 15 / (2 * pi * h ** 3) * r * (- 3 * r.norm() / (2 * h ** 3) + 2 / (h ** 2) - h / (2 * r.norm() ** 3))
+        else:
+            return m_vec.Vector([0, 0, 0])
+
+    def laplacian(self, r):
+        assert isinstance(r, m_vec.Vector)
+        h = self.h
+        if r.norm() <= h:
+            return 45 / (pi * h ** 6) * (h - r.norm())
+        else:
+            return 0.
+
+
 if __name__ == "__main__":
     A = SpikyKernel(10.)
     B = ViscosityKernel(10.)

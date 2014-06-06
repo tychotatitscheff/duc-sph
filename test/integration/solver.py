@@ -33,8 +33,9 @@ fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
 # list_vec = [random_vec() for i in range(0, 1000)]
 # for vec in list_vec:
 #     solve.create_active_particle(vec, fl, 1.)
+random.seed()
 particle = m_part.ActiveParticle(hashing, m_vec.Vector([0, 0, 0]), fl, 1.)
-solve.initial_volume(particle, "non oriented cube", "CFC", size=10)
+solve.initial_volume(particle, "non oriented cube", "CFC", size=10, speed="random")
 particle.__del__()
 solve.run()
 print("")

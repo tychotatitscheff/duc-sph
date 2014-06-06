@@ -22,14 +22,11 @@ import concurrent.futures
 
 import math
 import numpy as np
+import random
 
-import app.solver.helper.grouper as h_group
 import app.solver.model.particle as m_part
 import app.solver.model.collision as m_col
-
 import app.solver.model.kernel as m_kern
-import app.solver.model.hash_table as m_hash
-
 import app.solver.model.vector as m_vec
 
 from app.solver.conf import *
@@ -70,7 +67,7 @@ class SphSolver():
     def particles(self):
         return self.__particles
 
-    def create_active_particle(self, location, fluid, radius, fluid_type="liquid", gravity=True):
+    def create_active_particle(self, location, fluid, radius, fluid_type="liquid", gravity=True, speed=m_vec.Vector([0, 0, 0])):
         """
 
         :param location: location of the particle
@@ -81,7 +78,7 @@ class SphSolver():
         :type fluid: fluid
         """
 
-        act_part = m_part.ActiveParticle(self.particles, location, fluid, radius)
+        act_part = m_part.ActiveParticle(self.particles, location, fluid, radius, speed=speed)
         h = str(hash(act_part))
         vec_null = m_vec.Vector([0, 0, 0])
 
@@ -193,6 +190,15 @@ class SphSolver():
         assert isinstance(particle, m_part.ActiveParticle)
         r = particle.radius
         part_list = []
+        if 'speed' in kwargs:
+            if kwargs['speed'] == "random":
+                x = random.random()
+                y = random.random()
+                z = random.random()
+                u = m_vec.Vector([x, y, z])
+            else:
+                isinstance(kwargs['speed'], m_vec.Vector)
+                u = kwargs['speed']
         if primitive == "non oriented cube":
             if distribution == "CC":
                 s = kwargs['size']
@@ -219,7 +225,15 @@ class SphSolver():
                             part_list.append(m_vec.Vector([r * x, r * y, r * z]))
                     dec = not dec
         for element in part_list:
-            self.create_active_particle(element, particle.fluid, particle.radius)
+            if u is None:
+                self.create_active_particle(element, particle.fluid, particle.radius)
+            else:
+                if kwargs['speed'] == "random":
+                    x = random.random()
+                    y = random.random()
+                    z = random.random()
+                    u = m_vec.Vector([x, y, z])
+                self.create_active_particle(element, particle.fluid, particle.radius, speed=u)
         particle.__del__()
         return part_list
 
@@ -236,11 +250,3 @@ class SphSolver():
             p = self.create_active_particle(element, m_flu.Fluid, particle.radius)
             p.current_speed(speed)
 
-
-if __name__ == "__main__":
-    A = SphSolver(100, 1, 0.1)
-    H = m_hash.Hash(2, 2000)
-    import app.solver.model.fluid as m_flu
-    flu = m_flu.Fluid(1000, 1, 0.05, 0.00005, 1, 10, 2)
-    part1 = m_part.ActiveParticle(H, m_vec.Vector([0, 0, 0]), flu, 1)
-    print(A.initial_volume("non oriented cube", part1, size=20.))
