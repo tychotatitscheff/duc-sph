@@ -388,7 +388,7 @@ class Pressure(State):
 
     @staticmethod
     def factor(particle: ActiveParticle):
-        return particle.density.value * particle.fluid.k
+        return (particle.density.value - particle.fluid.rho0) * particle.fluid.k
 
     def __call__(self, particle):
         pressure = self.factor(particle)
@@ -441,7 +441,8 @@ class ForcePressure(Force):
         rho_i = particle.density.value
         p_j = n.pressure.value
         p_i = particle.pressure.value
-        return -mj * rho_i * (p_i / (rho_i ** 2) + p_j / (rho_j ** 2))
+        # return -mj * rho_i * (p_i / (rho_i ** 2) + p_j / (rho_j ** 2))
+        return -mj * rho_i * ((p_i + p_j) / (2 * rho_i * rho_j))
 
 
 class ForceViscosity(Force):
