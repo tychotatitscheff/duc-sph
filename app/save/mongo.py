@@ -18,11 +18,13 @@ __maintainer__ = "Tycho Tatitscheff"
 __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
+import pymongo
 from pymongo import MongoClient
-client = MongoClient()
+client = MongoClient('localhost', 27017)
+print(client.database_names())
 
 
-def create_database(nom):
+def open_database(nom):
     db = client[nom]
     return db
 
@@ -37,12 +39,12 @@ def drop_database(name):
             client.database_names().index(i).drop()
 
 
-def create_collection(name, database):
+def open_collection(name, database):
     collection = database[name]
     return collection
 
 
-def create_document(document, collection):
+def open_document(document, collection):
     post_id = collection.insert(document)
     print(post_id)
 

@@ -1,5 +1,3 @@
-__author__ = 'salas'
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -28,7 +26,7 @@ from PyQt4 import QtGui, QtCore
 import app.gui.widgets.glViewer as g_gl
 
 
-class Window(QtGui.QMainWindow):
+class MainWindows(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.showMaximized()
@@ -77,6 +75,6 @@ class Window(QtGui.QMainWindow):
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     app.setStyleSheet(qdarkstyle.load_stylesheet(pyside=False))
-    window = Window()
+    window = MainWindows()
     window.show()
     sys.exit(app.exec_())
