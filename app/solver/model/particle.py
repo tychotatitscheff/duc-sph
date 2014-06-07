@@ -490,10 +490,10 @@ class ForceSurfaceTension(Force):
         assert isinstance(part, ActiveParticle)
         resultant = m_vec.Vector([0, 0, 0])
         cf = ColourField("CF", self.kernel, 0)
-        cf_val = cf.__call__(part, neighbour)
+        #cf_val = cf.__call__(part, neighbour)
         std = DirectionSurfaceTension("STD", self.kernel, 0)
-        std_vec = std.__call__(part, neighbour)
-        std_grad = std.gradient(part, neighbour)
+        #std_vec = std.__call__(part, neighbour)
+        #std_grad = std.gradient(part, neighbour)
         std_grad_norm = std.gradient(part, neighbour).norm()
         if std_grad_norm >= part.fluid.l:  # Only compute surface tension when close to the surface
             for n in neighbour:

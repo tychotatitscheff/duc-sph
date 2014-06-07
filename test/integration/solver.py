@@ -24,7 +24,8 @@ import app.solver.model.vector as m_vec
 import app.solver.model.particle as m_part
 import app.solver.model.solver as m_solver
 import random
-import pytest
+
+import numpy as np
 
 hashing = m_hash.Hash(3, 1000)
 solve = m_solver.SphSolver(10, 0.1, hashing)
@@ -37,7 +38,8 @@ random.seed()
 particle = m_part.ActiveParticle(hashing, m_vec.Vector([0, 0, 0]), fl, 1.)
 solve.initial_volume(particle, "non oriented cube", "CFC", size=10, speed="random")
 particle.__del__()
-solve.run()
+for solve.t in np.arange(0, solve.tt, solve.dt):
+    solve.step()
 print("")
 
 

@@ -11,7 +11,7 @@ __credits__ = ["Clément Eberhardt",
                "Clément Léost",
                "Benoit Picq",
                "Théo Subtil",
-               " ycho Tatitscheff"]
+               "Tycho Tatitscheff"]
 __license__ = "MIT"
 __version__ = "1.0.1"
 __maintainer__ = "Tycho Tatitscheff"

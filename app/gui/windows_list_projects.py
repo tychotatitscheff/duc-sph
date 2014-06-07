@@ -1,5 +1,3 @@
-__author__ = 'salas'
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -73,13 +71,14 @@ class ProjectWindows(QDialog):
 
     def create_new(self):
         self.setEnabled(False)
-        self.project = NewProject().new()
+        self.project = NewProject(self).new()
         self.close()
 
 
 class NewProject(QDialog):
     def __init__(self, parent=None):
         QDialog.__init__(self, parent)
+        self.move(QDesktopWidget().availableGeometry().center() - self.frameGeometry().center())
         self.l_name = QLineEdit(self)
         self.b_create = QPushButton('create', self)
         layout = QVBoxLayout(self)

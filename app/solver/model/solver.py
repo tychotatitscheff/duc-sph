@@ -24,6 +24,7 @@ import math
 import numpy as np
 import random
 
+import app.solver.model.fluid as m_flu
 import app.solver.model.particle as m_part
 import app.solver.model.collision as m_col
 import app.solver.model.kernel as m_kern
@@ -46,6 +47,14 @@ class SphSolver():
         self.__dt = dt
         self.__particles = hashing
         self.__collisions_objects = [] if collisions_objects is None else collisions_objects
+
+    @property
+    def t(self):
+        return self.__t
+
+    @t.setter
+    def t(self, t):
+        self.__t = t
 
     @property
     def dt(self):
@@ -109,20 +118,19 @@ class SphSolver():
             act_part.append_force(f_g, internal=False)
         return act_part
 
-    def run(self):
-        # Initialize the system if not
-        while self.__t < self.__tt:
-            print(self.__t)
-            # Compute density and pressure
-            self.__compute_density_and_pressure()
-            # Compute forces and integrate
-            self.__compute_forces_and_integrate()
-            #Check for collision
-
-            #Update
-            self.__update()
-            #End loop
-            self.__t += self.dt
+    def step(self):
+        print(self.t)
+        # Compute density and pressure
+        self.__compute_density_and_pressure()
+        # Compute forces and integrate
+        self.__compute_forces_and_integrate()
+        # Check for collision
+        self.__check_for_collision()
+        # Generate numpy array
+        np_array = self.__generate_numpy_array()
+        print(np_array)
+        # Update
+        self.__update()
 
     def __compute_density_and_pressure(self):
         def try_compute_density(structure):
@@ -171,6 +179,32 @@ class SphSolver():
                         print(e)
         hashing = self.particles.hash_table.values()
         try_check_for_collision(hashing)
+
+    def __generate_numpy_array(self):
+        def try_generate_numpy_array(structure):
+            for list_particles in structure:
+                for particle in list_particles:
+                    try:
+                        assert isinstance(particle, m_part.ActiveParticle)
+                        loc = particle.current_location.value
+                        speed = particle.future_speed.value
+                        acc = particle.future_acceleration.value
+                        force_pres, force_visc, force_st = m_vec.Vector([0, 0, 0])
+                        for force in particle.forces:
+                            if isinstance(force, m_part.ForcePressure):
+                                force_pres = force.value
+                            if isinstance(force, m_part.ForceViscosity):
+                                force_visc = force.value
+                            if isinstance(force, m_part.ForceSurfaceTension):
+                                force_st = force.value
+                        part_array = np.array([loc, speed, acc, force_pres, force_visc, force_st])
+                        particles.append(part_array)
+                    except Exception as e:
+                        print(e)
+        particles = []
+        hashing = self.particles.hash_table.values()
+        try_generate_numpy_array(hashing)
+        return particles
 
     def __update(self):
         def try_update(structure):
