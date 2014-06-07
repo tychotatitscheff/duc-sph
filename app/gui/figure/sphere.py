@@ -23,7 +23,7 @@ __status__ = "Production"
 import numpy as np
 
 
-def add_sphere(location, radius, color=None, dec=0):
+def add_sphere_vertices(location, radius):
     vtx_array = np.array(
         [[-0.642708, -0.642708, 0.642708], [-0.642708, -0.642708, -0.642708], [0.642708, -0.642708, -0.642708],
          [0.642708, -0.642708, 0.642708], [-0.642708, 0.642708, 0.642708], [-0.642708, 0.642708, -0.642708],
@@ -61,6 +61,10 @@ def add_sphere(location, radius, color=None, dec=0):
         radius + \
         location
 
+    return vtx_array
+
+
+def add_sphere_index(dec=0):
     idx_array = np.array(
         [52, 16, 1, 17, 61, 25, 2, 26, 70, 34, 3, 35, 79, 8, 0, 41, 88, 26, 2, 37, 97, 20, 5, 13, 8, 46, 19, 0, 46,
          49, 18, 19, 49, 52, 17, 18, 4, 11, 44, 10, 10, 44, 45, 9, 9, 45, 46, 8, 11, 12, 47, 44, 44, 47, 48, 45, 45,
@@ -78,9 +82,5 @@ def add_sphere(location, radius, color=None, dec=0):
          90, 90, 93, 94, 91, 30, 29, 95, 92, 92, 95, 96, 93, 93, 96, 97, 94, 29, 6, 22, 95, 95, 22, 21, 96, 96, 21,
          20, 97]) + dec
 
-    if color is None:
-        color = [.3, .3, .3]
-    clr_array = [color for lis in vtx_array]
-
-    return vtx_array, idx_array, clr_array
+    return idx_array
 
