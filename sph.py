@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     ############ Initialize connection to database ###############
     import app.save.mongo as d_mongo
-    sph_db = d_mongo.open_database('sph')
+    sph_db = d_mongo.db
     list_projects = sph_db.collection_names(include_system_collections=False)
 
     #################### Project windows #########################

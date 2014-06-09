@@ -36,10 +36,12 @@ fl = m_fluid.Fluid(1, 1, 1, 1, 1, 1, 1)
 #     solve.create_active_particle(vec, fl, 1.)
 random.seed()
 particle = m_part.ActiveParticle(hashing, m_vec.Vector([0, 0, 0]), fl, 1.)
-solve.initial_volume(particle, "non oriented cube", "CFC", size=10, speed="random")
+solve.initial_volume(particle, "non oriented cube", "CFC", size=30, speed="random")
 particle.__del__()
-for solve.t in np.arange(0, solve.tt, solve.dt):
-    solve.step()
-print("")
 
+array = solve.step()
+import app.plot.generate_images as p_gen
+
+I = p_gen.Image(array)
+I.generate()
 

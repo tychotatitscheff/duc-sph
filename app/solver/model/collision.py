@@ -40,8 +40,8 @@ class CollisionObject(object):
 
         u -= (1 + cr * d / (dt * u.norm())) * m_vec.dot(u, n_cp) * n_cp
 
-        particle.future_location.value = cp
-        particle.future_speed.value = u
+        particle.reaction_location.value = cp
+        particle.reaction_speed.value = u
 
     def react(self, particle, dt):
         pass
@@ -87,6 +87,9 @@ class Sphere(ImplicitPrimitive):
             n_cp = math.copysign(1, f) * (x - c) / (c - x).norm()
 
             self.reaction(particle, cp, d, n_cp, dt)
+        else:
+            particle.reaction_location.value = particle.future_location.value
+            particle.reaction_speed.value = particle.future_location.speed
 
 
 class Box(ImplicitPrimitive):

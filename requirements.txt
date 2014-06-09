@@ -1,3 +1,4 @@
+matplotlib
 Cython
 PyQt4
 pytest

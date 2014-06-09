@@ -19,18 +19,14 @@ __email__ = "tycho.tatitscheff@ensam.eu"
 __status__ = "Production"
 
 import pymongo
+import requests
+from mimetypes import MimeTypes
 from pymongo import MongoClient
+from gridfs import GridFS
+
 client = MongoClient('localhost', 27017)
-print(client.database_names())
-
-
-def open_database(nom):
-    db = client[nom]
-    return db
-
-
-def check_database(name):
-    print(name in client.database_names())
+sph_db = client['sph']
+fs = GridFS(sph_db)
 
 
 def drop_database(name):
@@ -39,13 +35,19 @@ def drop_database(name):
             client.database_names().index(i).drop()
 
 
-def open_collection(name, database):
-    collection = database[name]
+def open_collection(name):
+    collection = sph_db[name]
     return collection
 
 
-def open_document(document, collection):
-    post_id = collection.insert(document)
-    print(post_id)
+def insert_document(document, collection):
+    collection.insert(document)
+
+
+def insert_binary_document(binary, collection):
+    m = MimeTypes()
+    mime_type = m.guess_type(binary)
+    doc = fs.put(binary, content_type=mime_type)
+    collection.insert(doc)
 
 

@@ -128,9 +128,9 @@ class SphSolver():
         self.__check_for_collision()
         # Generate numpy array
         np_array = self.__generate_numpy_array()
-        print(np_array)
         # Update
         self.__update()
+        return np_array
 
     def __compute_density_and_pressure(self):
         def try_compute_density(structure):
@@ -189,6 +189,8 @@ class SphSolver():
                         loc = particle.current_location.value
                         speed = particle.future_speed.value
                         acc = particle.future_acceleration.value
+                        col_loc = particle.reaction_location.value - particle.future_location.value
+                        col_speed = particle.reaction_speed.value - particle.future_speed.value
                         force_pres, force_visc, force_st = m_vec.Vector([0, 0, 0])
                         for force in particle.forces:
                             if isinstance(force, m_part.ForcePressure):
@@ -197,14 +199,14 @@ class SphSolver():
                                 force_visc = force.value
                             if isinstance(force, m_part.ForceSurfaceTension):
                                 force_st = force.value
-                        part_array = np.array([loc, speed, acc, force_pres, force_visc, force_st])
+                        part_array = np.array([loc, speed, acc, col_loc, col_speed, force_pres, force_visc, force_st])
                         particles.append(part_array)
                     except Exception as e:
                         print(e)
         particles = []
         hashing = self.particles.hash_table.values()
         try_generate_numpy_array(hashing)
-        return particles
+        return np.array(particles)
 
     def __update(self):
         def try_update(structure):

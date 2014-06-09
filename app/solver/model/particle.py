@@ -78,9 +78,11 @@ class ActiveParticle(object):
         # Integrated properties
         self.__current_location = Position("Current location of " + str(self.__hash__()), location)
         self.__future_location = Position("Future location of " + str(self.__hash__()), location)
+        self.__reaction_location = Position("Reaction location of " + str(self.__hash__()), location)
 
         self.__current_speed = Speed("Current speed of" + str(self.__hash__()), speed)
         self.__future_speed = Speed("Future speed of" + str(self.__hash__()), speed)
+        self.__reaction_speed = Speed("Reaction speed of" + str(self.__hash__()), speed)
 
         self.__current_acceleration = Acceleration("Current acceleration of" + str(self.__hash__()), acceleration)
         self.__future_acceleration = Acceleration("Future acceleration of" + str(self.__hash__()), acceleration)
@@ -182,6 +184,15 @@ class ActiveParticle(object):
         assert isinstance(loc, Position)
         self.__future_location = loc
 
+    @property
+    def reaction_location(self):
+        return self.__reaction_location
+
+    @reaction_location.setter
+    def reaction_location(self, loc):
+        assert isinstance(loc, Position)
+        self.__reaction_location = loc
+
     ### Speed
 
     @property
@@ -202,6 +213,15 @@ class ActiveParticle(object):
         assert isinstance(sp, Speed)
         self.__future_speed = sp
 
+    @property
+    def reaction_speed(self):
+        return self.__reaction_speed
+
+    @reaction_speed.setter
+    def reaction_speed(self, sp):
+        assert isinstance(sp, Speed)
+        self.__reaction_speed = sp
+
     ### Acceleration
 
     @property
@@ -221,6 +241,7 @@ class ActiveParticle(object):
     def future_acceleration(self, acc):
         assert isinstance(acc, Acceleration)
         self.__future_acceleration = acc
+
 
     ### Forces
 
