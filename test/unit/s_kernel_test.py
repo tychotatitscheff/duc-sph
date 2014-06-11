@@ -24,7 +24,7 @@ import app.solver.model.vector as s_v
 
 
 # test default kernel
-k1 = s_k.DefaultKernel(10)
+k1 = s_k.SpikyKernel(10)
 
 
 class TestDefaultKernel:

@@ -127,10 +127,10 @@ class SphSolver():
         # Check for collision
         self.__check_for_collision()
         # Generate numpy array
-        np_array = self.__generate_numpy_array()
+        # np_array = self.__generate_numpy_array()
         # Update
         self.__update()
-        return np_array
+        #return np_array
 
     def __compute_density_and_pressure(self):
         def try_compute_density(structure):
@@ -227,14 +227,11 @@ class SphSolver():
         r = particle.radius
         part_list = []
         if 'speed' in kwargs:
-            if kwargs['speed'] == "random":
-                x = random.random()
-                y = random.random()
-                z = random.random()
-                u = m_vec.Vector([x, y, z])
-            else:
+            if not kwargs['speed'] == "random":
                 isinstance(kwargs['speed'], m_vec.Vector)
                 u = kwargs['speed']
+        else:
+            u = m_vec.Vector([0, 0, 0])
         if primitive == "non oriented cube":
             if distribution == "CC":
                 s = kwargs['size']
@@ -261,7 +258,7 @@ class SphSolver():
                             part_list.append(m_vec.Vector([r * x, r * y, r * z]))
                     dec = not dec
         for element in part_list:
-            if u is None:
+            if u is None or 'speed' not in kwargs:
                 self.create_active_particle(element, particle.fluid, particle.radius)
             else:
                 if kwargs['speed'] == "random":
