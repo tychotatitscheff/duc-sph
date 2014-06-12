@@ -1,0 +1,8 @@
+matplotlib
+Cython
+PyQt4
+pytest
+numpy
+qdarkstyle
+jsonpickle
+pymongo
