@@ -1,8 +1,9 @@
-matplotlib
-Cython
-PyQt4
-pytest
 numpy
-qdarkstyle
 jsonpickle
 pymongo
+matplotlib
+Cython
+pytest
+
+qdarkstyle
+
