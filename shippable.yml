@@ -8,7 +8,7 @@ before_install:
   - echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
   - sudo apt-get update
   - sudo apt-get install mongodb-org
-  - sudo service mongod stop
+  - sudo
   - sudo apt-get install build-essential python-dev gcc gfortran python-dev libblas-dev liblapack-dev cython
   - sudo apt-get install -qq python-qt4
 install:
@@ -20,4 +20,6 @@ before_script:
   - mkdir -p shippable/codecoverage
 
 script:
-  - py.test --junit-xml=shippable/testresults/results.xml test/unit/ --cov-report xml --cov duc-sph/test/unit
+  - py.test --junitxml=shippable/testresults/results.xml --cov-report xml --cov duc-sph test/unit/
+  - which python && coverage run --branch test.py
+  - which python && coverage xml -o shippable/codecoverage/coverage.xml test.py
