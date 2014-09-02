@@ -21,5 +21,3 @@ before_script:
 
 script:
   - py.test --cov-report xml --cov openpyxl --junit-xml=shippable/testresults/results.xml test/unit/
-  - which python && coverage run --branch test.py
-  - which python && coverage xml -o shippable/codecoverage/coverage.xml test.py

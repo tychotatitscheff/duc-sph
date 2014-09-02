@@ -4,6 +4,6 @@ pymongo
 matplotlib
 Cython
 pytest
-
+pytest-cov
 qdarkstyle
 
