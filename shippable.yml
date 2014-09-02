@@ -4,7 +4,8 @@ python:
   - 3.4
 
 before_install:
-    - sudo apt-get install -qq python-qt4 python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
+    - sudo apt-get install build-essential python-dev gcc gfortran python-dev libblas-dev liblapack-dev cython
+    - sudo apt-get install -qq python-qt4
 install:
   - pip install -r requirements.txt
 
