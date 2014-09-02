@@ -3,6 +3,9 @@ language: python
 python:
   - 3.4
 
+before_install:
+    - sudo apt-get install -qq qt4 pyqt4
+    - sudo service couchdb start
 install:
   - pip install -r requirements.txt
 
@@ -12,6 +15,6 @@ before_script:
   - mkdir -p shippable/codecoverage
 
 script:
-  - nosetests test.py --with-xunit --xunit-file=shippable/testresults/nosetests.xml
+  - py.test --cov-report xml --cov openpyxl --junit-xml=shippable/testresults/results.xml test/unit/
   - which python && coverage run --branch test.py
   - which python && coverage xml -o shippable/codecoverage/coverage.xml test.py
