@@ -7,10 +7,11 @@ before_install:
   - sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
   - echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
   - sudo apt-get update
-  - sudo apt-get install mongodb-org
-  - sudo
-  - sudo apt-get install build-essential python-dev gcc gfortran python-dev libblas-dev liblapack-dev cython
+  - sudo apt-get install -qq mongodb-org
+  - sudo service mongod restart
+  - sudo apt-get install -qq build-essential python-dev gcc gfortran python-dev libblas-dev liblapack-dev cython
   - sudo apt-get install -qq python-qt4
+
 install:
   - pip install -r requirements.txt
 
@@ -23,3 +24,4 @@ script:
   - py.test --junitxml=shippable/testresults/results.xml --cov-report xml --cov duc-sph test/unit/
   - which python && coverage run --branch test.py
   - which python && coverage xml -o shippable/codecoverage/coverage.xml test.py
+
