@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     ############ Initialize connection to database ###############
     import app.save.mongo as d_mongo
-    sph_db = d_mongo.db
+    sph_db = d_mongo.sph_db
     list_projects = sph_db.collection_names(include_system_collections=False)
 
     #################### Project windows #########################
@@ -43,20 +43,17 @@ if __name__ == "__main__":
 
     ################## Create or open solver ####################
     import app.solver.model.solver as s_sol
-    import jaraco.modb as d_jaraco
+    import pickle
+    import json
     if project_col.count() == 0:
         import app.gui.windows_create_project as g_create_project
         properties = g_create_project.CreateProjectWindows().get_properties()
         import app.solver.model.hash_table as s_hash
         hashing = s_hash.Hash(properties[2], properties[3])
         solve = s_sol.SphSolver(properties[0], properties[1], hashing)
-        post = {'initial_state': d_jaraco.encode(solve)}
+        post = {'initial_state': json.dumps(solve.__dict__)}
         project_col.insert(post)
         del solve, post
     for doc in project_col.find({'initial_state': {'$exists': True}}):
         solve = d_jaraco.decode(doc['initial_state'])
         print(solve)
-
-
-
-

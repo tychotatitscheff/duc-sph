@@ -23,7 +23,7 @@ import sys
 import qdarkstyle
 from PyQt4 import QtGui, QtCore
 
-import app.gui.widgets.glViewer as g_gl
+#import widgets.glViewer as g_gl
 
 
 class MainWindows(QtGui.QMainWindow):
@@ -47,8 +47,8 @@ class MainWindows(QtGui.QMainWindow):
         self.main_layout = QtGui.QVBoxLayout(self.central_widget)
         self.splitter_v = QtGui.QSplitter(QtCore.Qt.Vertical)
 
-        self.gl_widget = g_gl.GLWidget()
-        self.splitter_v.addWidget(self.gl_widget)
+        #self.gl_widget = g_gl.GLWidget()
+        #self.splitter_v.addWidget(self.gl_widget)
 
         self.node_editor = QtGui.QFrame()
         self.splitter_v.addWidget(self.node_editor)
